@@ -1,13 +1,20 @@
+import { useLoaderData } from "react-router";
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Colourdle!" },
+    { name: "Colourdle!", content: "Welcome to the NEW Colourdle!" },
   ];
 }
 
+export async function loader({}: Route.LoaderArgs) {
+  const data = { url: process.env.DATABASE_URL };
+  return data;
+}
+
 export default function Home() {
-  return <Welcome />;
+  const { url } = useLoaderData<typeof loader>();
+
+  return <div>{url}</div>;
 }
