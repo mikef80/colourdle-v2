@@ -6,11 +6,12 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "test": "jest --watch",
+    "seed": "npx prisma db seed",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"
   },
   "prisma": {
-    "seed": "ts-node prisma/seeds/seed.ts"
+    "seed": "ts-node prisma/seeds/run-seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
