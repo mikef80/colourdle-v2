@@ -1,5 +1,7 @@
+import { stat } from "fs";
 import prisma from "../db/client";
 import { encryptPassword } from "./passwordUtils.server";
+import { commitSession, getSession } from "./sessions.server";
 
 interface SignupData {
   email: string;
@@ -24,7 +26,19 @@ const signup = async ({ email, firstname, lastname, password }: SignupData) => {
     },
   });
 
-  return newUser;
+  // create a session here
+  const session = await getSession();
+  session.set("userId", newUser.id);
+
+  // return the session token
+  return new Response(null, {
+    status: 302,
+    headers: new Headers({
+      Location: "/",
+      "set-cookie": await commitSession(session),
+      "content-type": "text/plain;charset=UTF-8",
+    }),
+  });
 };
 
 export { signup };
