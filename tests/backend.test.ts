@@ -1,6 +1,5 @@
 import { afterAll, beforeEach } from "@jest/globals";
 import prisma from "../app/db/client";
-import { jest } from "@jest/globals";
 import userData from "../prisma/data/test-data/users";
 import gameData from "../prisma/data/test-data/games";
 import resultData from "../prisma/data/test-data/results";
@@ -8,7 +7,9 @@ import seed from "../prisma/seeds/seed";
 import { describe } from "node:test";
 import { signup } from "../app/utils/auth.server";
 import bcrypt from "bcrypt";
-import { log } from "util";
+import request from "supertest";
+
+const URL = "http://localhost:5173/";
 
 beforeEach(() => seed({ userData, gameData, resultData }));
 afterEach(async () => {
@@ -89,5 +90,19 @@ describe("signup function", async () => {
     const response = await signup(newUser);
 
     expect(response!.headers.get("Location")).toBe("/");
+  });
+
+  it("should return a 201 successful signup when sending signup data to backend route", async () => {
+    const newUser = {
+      email: "davey.jones@locker.com",
+      firstname: "Davey",
+      lastname: "Jones",
+      password: "password123",
+    };
+
+    const response = await request(URL).post("/api/signup").send(newUser);
+
+    expect(response.status).toBe(201);
+    // expect(response.body.message).toBe("User created");
   });
 });
