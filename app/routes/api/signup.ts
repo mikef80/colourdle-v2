@@ -1,15 +1,21 @@
+import { redirect } from "@remix-run/node";
 import { signup } from "~/utils/auth.server";
 
 export const action = async ({ request }: { request: Request }) => {
-  const body = await request.json();
-  const { email, firstname, lastname, password } = body;
+  try {
+    const body = await request.json();
+    const response = await signup(body);
 
-  console.log(`
-    email: ${email}
-    firstname: ${firstname}
-    lastname: ${lastname}
-    password: ${password}
-    `);
+    if (response.status === 201) {
+      return redirect("/");
+    }
 
-  return new Response(null, { status: 201 });
+    return response;
+    
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Something went wrong" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 };

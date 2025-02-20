@@ -13,7 +13,11 @@ interface SignupData {
 const signup = async ({ email, firstname, lastname, password }: SignupData) => {
   const existingUser = await prisma.user.findUnique({ where: { email } });
 
-  if (existingUser) throw new Error("Email already in use");
+  if (existingUser)
+    return new Response(JSON.stringify({ error: "Email already in use" }), {
+      status: 400,
+      headers: { "Content-type": "application/json" },
+    });
 
   const hashedPassword = await encryptPassword(password);
 
@@ -31,13 +35,12 @@ const signup = async ({ email, firstname, lastname, password }: SignupData) => {
   session.set("userId", newUser.id);
 
   // return the session token
-  return new Response(null, {
-    status: 302,
-    headers: new Headers({
-      Location: "/",
+  return new Response(JSON.stringify({ message: "User created" }), {
+    status: 201,
+    headers: {
       "set-cookie": await commitSession(session),
-      "content-type": "text/plain;charset=UTF-8",
-    }),
+      "content-type": "application/json",
+    },
   });
 };
 

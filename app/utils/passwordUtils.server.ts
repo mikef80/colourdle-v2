@@ -5,4 +5,6 @@ const encryptPassword = async (password: string) => {
   return await bcrypt.hash(password, saltRounds);
 };
 
+// create function to check password validity using bcrypt.compare
+
 export{ encryptPassword };
