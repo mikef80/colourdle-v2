@@ -1,10 +1,9 @@
-import { afterAll, beforeEach } from "@jest/globals";
+import { afterAll, beforeEach, describe } from "@jest/globals";
 import prisma from "../app/db/client";
 import userData from "../prisma/data/test-data/users";
 import gameData from "../prisma/data/test-data/games";
 import resultData from "../prisma/data/test-data/results";
 import seed from "../prisma/seeds/seed";
-import { describe } from "node:test";
 import { signup } from "../app/utils/auth.server";
 import bcrypt from "bcrypt";
 import request from "supertest";
@@ -19,6 +18,24 @@ afterEach(async () => {
   await prisma.user.deleteMany();
 });
 afterAll(() => prisma.$disconnect());
+
+describe("utils functions", () => {
+  it("should return a valid encrypted password from encryptPassword function", async () => {
+    const password = "password";
+    const hashedPassword = await encryptPassword(password);
+
+    expect(hashedPassword).not.toBe(password);
+    expect(hashedPassword).toMatch(/^\$2[ayb]\$.{56}$/);
+    expect(await bcrypt.compare(password, hashedPassword)).toBe(true);
+  });
+
+  it("should return true when passing a valid password to comparePassword function", async () => {
+    const password = "password";
+    const hashedPassword = await encryptPassword(password);
+
+    expect(await comparePassword(password, hashedPassword)).toBe(true);
+  });
+});
 
 describe("signup function", () => {
   it("should throw an error if the email is already in use", async () => {
@@ -103,19 +120,11 @@ describe("signup function", () => {
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe("/");
   });
+});
 
-  it("should return a valid encrypted password from encryptPassword function", async () => {
-    const password = "password";
-    const hashedPassword = await encryptPassword(password);
-
-    expect(hashedPassword).not.toBe(password);
-    expect(hashedPassword).toMatch(/^\$2[ayb]\$.{56}$/);
-    expect(await bcrypt.compare(password, hashedPassword)).toBe(true);
-  });
-
-  it("should return true when passing a valid password to comparePassword function", async () => {
-    const password = "password";
-    const hashedPassword = await encryptPassword(password);
+describe("login function", () => {
+  it("should have a valid route defined for login", async () => {
+    const response = await request(URL).get("/api/login");
 
     // expect(await comparePassword(password, hashedPassword)).toBe(true);
     expect(await comparePassword(password, hashedPassword)).toBeTrue();
