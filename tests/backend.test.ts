@@ -117,6 +117,7 @@ describe("signup function", () => {
     const password = "password";
     const hashedPassword = await encryptPassword(password);
 
-    expect(await comparePassword(password, hashedPassword)).toBe(true);
+    // expect(await comparePassword(password, hashedPassword)).toBe(true);
+    expect(await comparePassword(password, hashedPassword)).toBeTrue();
   });
 });
