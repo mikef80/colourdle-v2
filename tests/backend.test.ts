@@ -11,6 +11,15 @@ import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.ser
 
 const URL = "http://localhost:5173/";
 
+// check server is running before running tests
+beforeAll(async () => {
+  try {
+    const res = await fetch(URL);
+    if (!res.ok) throw new Error("Backend not responding");
+  } catch (err) {
+    throw new Error("Backend server is not running. Start it before running tests.");
+  }
+});
 beforeEach(() => seed({ userData, gameData, resultData }));
 afterEach(async () => {
   await prisma.result.deleteMany();
