@@ -10,13 +10,18 @@ interface SignupData {
   password: string;
 }
 
+interface LoginData {
+  email: string;
+  password: string;
+}
+
 const signup = async ({ email, firstname, lastname, password }: SignupData) => {
   const existingUser = await prisma.user.findUnique({ where: { email } });
 
   if (existingUser)
     return new Response(JSON.stringify({ error: "Email already in use" }), {
       status: 400,
-      headers: { "Content-type": "application/json" },
+      headers: { "content-type": "application/json" },
     });
 
   const hashedPassword = await encryptPassword(password);
@@ -44,4 +49,11 @@ const signup = async ({ email, firstname, lastname, password }: SignupData) => {
   });
 };
 
-export { signup };
+const login = async ({ email, password }: LoginData) => {
+  return new Response(JSON.stringify({ error: "Email and password are required" }), {
+    status: 400,
+    headers: { "content-type": "application/json" },
+  });
+};
+
+export { signup, login };

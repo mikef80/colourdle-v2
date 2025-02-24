@@ -4,7 +4,7 @@ import userData from "../prisma/data/test-data/users";
 import gameData from "../prisma/data/test-data/games";
 import resultData from "../prisma/data/test-data/results";
 import seed from "../prisma/seeds/seed";
-import { signup } from "../app/utils/auth.server";
+import { login, signup } from "../app/utils/auth.server";
 import bcrypt from "bcrypt";
 import request from "supertest";
 import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
@@ -123,10 +123,14 @@ describe("signup function", () => {
 });
 
 describe("login function", () => {
-  it("should have a valid route defined for login", async () => {
-    const response = await request(URL).get("/api/login");
+  it("should return an error if either email or password aren't provided", async () => {
+    const email = "john.doe@example.com";
+    const password = "";
 
-    // expect(await comparePassword(password, hashedPassword)).toBe(true);
-    expect(await comparePassword(password, hashedPassword)).toBeTrue();
+    const response = await login({ email, password });
+    const { error } = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(error).toBe("Email and password are required");
   });
 });
