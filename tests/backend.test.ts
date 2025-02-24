@@ -13,13 +13,11 @@ import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.ser
 const URL = "http://localhost:5173/";
 
 beforeEach(() => seed({ userData, gameData, resultData }));
-
 afterEach(async () => {
   await prisma.result.deleteMany();
   await prisma.game.deleteMany();
   await prisma.user.deleteMany();
 });
-
 afterAll(() => prisma.$disconnect());
 
 describe("signup function", () => {
@@ -114,11 +112,11 @@ describe("signup function", () => {
     expect(hashedPassword).toMatch(/^\$2[ayb]\$.{56}$/);
     expect(await bcrypt.compare(password, hashedPassword)).toBe(true);
   });
-});
 
-it("should return true when passing a valid password to comparePassword function", async () => {
-  const password = "password";
-  const hashedPassword = await encryptPassword(password);
+  it("should return true when passing a valid password to comparePassword function", async () => {
+    const password = "password";
+    const hashedPassword = await encryptPassword(password);
 
-  expect(await comparePassword(password, hashedPassword)).toBe(true);
+    expect(await comparePassword(password, hashedPassword)).toBe(true);
+  });
 });
