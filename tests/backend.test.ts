@@ -8,7 +8,7 @@ import { describe } from "node:test";
 import { signup } from "../app/utils/auth.server";
 import bcrypt from "bcrypt";
 import request from "supertest";
-import { encryptPassword } from "../app/utils/passwordUtils.server";
+import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
 
 const URL = "http://localhost:5173/";
 
@@ -114,4 +114,11 @@ describe("signup function", () => {
     expect(hashedPassword).toMatch(/^\$2[ayb]\$.{56}$/);
     expect(await bcrypt.compare(password, hashedPassword)).toBe(true);
   });
+});
+
+it("should return true when passing a valid password to comparePassword function", async () => {
+  const password = "password";
+  const hashedPassword = await encryptPassword(password);
+
+  expect(await comparePassword(password, hashedPassword)).toBe(true);
 });
