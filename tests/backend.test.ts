@@ -120,5 +120,6 @@ it("should return true when passing a valid password to comparePassword function
   const password = "password";
   const hashedPassword = await encryptPassword(password);
 
-  expect(await comparePassword(password, hashedPassword)).toBe(true);
+  // expect(await comparePassword(password, hashedPassword)).toBe(true);
+  expect(await comparePassword(password, hashedPassword)).toBeTrue();
 });
