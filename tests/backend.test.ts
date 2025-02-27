@@ -8,6 +8,7 @@ import { login, signup } from "../app/utils/auth.server";
 import bcrypt from "bcrypt";
 import request from "supertest";
 import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
+import * as authModule from "../app/utils/auth.server";
 
 const URL = "http://localhost:5173/";
 
@@ -25,6 +26,7 @@ afterEach(async () => {
   await prisma.result.deleteMany();
   await prisma.game.deleteMany();
   await prisma.user.deleteMany();
+  jest.resetAllMocks();
 });
 afterAll(() => prisma.$disconnect());
 
@@ -133,13 +135,113 @@ describe("signup function", () => {
 
 describe("login function", () => {
   it("should return an error if either email or password aren't provided", async () => {
-    const email = "john.doe@example.com";
-    const password = "";
+    const newUser = {
+      email: "davey.jones@locker.com",
+      firstname: "Davey",
+      lastname: "Jones",
+      password: "password123",
+    };
 
-    const response = await login({ email, password });
+    await request(URL).post("/api/signup").send(newUser);
+
+    const response = await login({ email: newUser.email, password: "" });
     const { error } = await response.json();
 
     expect(response.status).toBe(400);
     expect(error).toBe("Email and password are required");
+  });
+
+  it("should return an error if the email doesn't exist", async () => {
+    const newUser = {
+      email: "davey.jones@locker.com",
+      firstname: "Davey",
+      lastname: "Jones",
+      password: "password123",
+    };
+
+    await request(URL).post("/api/signup").send(newUser);
+
+    const response = await login({
+      email: "davey.jones1@locker.com",
+      password: newUser.password,
+    });
+    const { error } = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(error).toBe("User not found");
+  });
+
+  it("should return an error if the password is incorrect", async () => {
+    const newUser = {
+      email: "davey.jones@locker.com",
+      firstname: "Davey",
+      lastname: "Jones",
+      password: "password123",
+    };
+
+    await request(URL).post("/api/signup").send(newUser);
+
+    const response = await login({ email: newUser.email, password: "password124" });
+    const { error } = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(error).toBe("Incorrect password");
+  });
+
+  it("should return a session token on sucessful login", async () => {
+    const newUser = {
+      email: "davey.jones@locker.com",
+      firstname: "Davey",
+      lastname: "Jones",
+      password: "password123",
+    };
+
+    await request(URL).post("/api/signup").send(newUser);
+
+    const response = await login({ email: newUser.email, password: newUser.password });
+
+    expect(response.status).toBe(201);
+    expect(response.headers.get("set-cookie")).toBeDefined();
+  });
+
+  it("should return a 302 successful login when sending login data to backend route", async () => {
+    const newUser = {
+      email: "davey.jones@locker.com",
+      firstname: "Davey",
+      lastname: "Jones",
+      password: "password123",
+    };
+
+    await request(URL).post("/api/signup").send(newUser);
+
+    const response = await request(URL).post("/api/login").send({
+      email: newUser.email,
+      password: newUser.password,
+    });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.location).toBe("/");
+  });
+
+  it("should throw a 500 error if an error occurs during login", async () => {
+    jest.spyOn(authModule, "login").mockRejectedValueOnce(new Error("Something went wrong"));
+
+    const newUser = {
+      email: "davey.jones@locker.com",
+      firstname: "Davey",
+      lastname: "Jones",
+      password: "password123",
+    };
+
+    await request(URL).post("/api/signup").send(newUser);
+
+    const response = await request(URL)
+      .post("/api/login")
+      .send({ email: newUser.email, password: newUser.password });
+
+    const { error } = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(error).toBe("Something went wrong");
   });
 });

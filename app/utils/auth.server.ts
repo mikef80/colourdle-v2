@@ -1,6 +1,6 @@
 import { stat } from "fs";
 import prisma from "../db/client";
-import { encryptPassword } from "./passwordUtils.server";
+import { comparePassword, encryptPassword } from "./passwordUtils.server";
 import { commitSession, getSession } from "./sessions.server";
 
 interface SignupData {
@@ -50,8 +50,33 @@ const signup = async ({ email, firstname, lastname, password }: SignupData) => {
 };
 
 const login = async ({ email, password }: LoginData) => {
-  return new Response(JSON.stringify({ error: "Email and password are required" }), {
-    status: 400,
+  if (!email || !password) {
+    return new Response(JSON.stringify({ error: "Email and password are required" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    return new Response(JSON.stringify({ error: "User not found" }), {
+      status: 404,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  const match = await comparePassword(password, user.password);
+
+  if (!match) {
+    return new Response(JSON.stringify({ error: "Incorrect password" }), {
+      status: 401,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  return new Response(JSON.stringify({ message: "Login successful" }), {
+    status: 201,
     headers: { "content-type": "application/json" },
   });
 };
