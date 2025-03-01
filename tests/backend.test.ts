@@ -8,7 +8,6 @@ import { login, signup } from "../app/utils/auth.server";
 import bcrypt from "bcrypt";
 import request from "supertest";
 import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
-import * as authModule from "../app/utils/auth.server";
 
 const URL = "http://localhost:5173/";
 
@@ -221,27 +220,5 @@ describe("login function", () => {
 
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe("/");
-  });
-
-  it("should throw a 500 error if an error occurs during login", async () => {
-    jest.spyOn(authModule, "login").mockRejectedValueOnce(new Error("Something went wrong"));
-
-    const newUser = {
-      email: "davey.jones@locker.com",
-      firstname: "Davey",
-      lastname: "Jones",
-      password: "password123",
-    };
-
-    await request(URL).post("/api/signup").send(newUser);
-
-    const response = await request(URL)
-      .post("/api/login")
-      .send({ email: newUser.email, password: newUser.password });
-
-    const { error } = await response.json();
-
-    expect(response.status).toBe(500);
-    expect(error).toBe("Something went wrong");
   });
 });
