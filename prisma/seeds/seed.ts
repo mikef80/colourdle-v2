@@ -3,26 +3,29 @@ import userData from "../data/test-data/users.ts";
 import gameData from "../data/test-data/games.ts";
 import resultData from "../data/test-data/results.ts";
 
-interface userData {
+export interface userData {
   email: string;
   firstname: string;
   lastname: string;
   password: string;
 }
 
-interface gameData {
-  gameDate: string;
-  answer: number[];
+export interface gameData {
+  gameDate: Date;
+  answer: {
+    rgb: number[];
+    hex: string;
+  };
 }
 
-interface resultData {
+export interface resultData {
   status: string;
   createdAt: string;
   updatedAt: string;
   guesses: number[][];
 }
 
-interface seedData {
+export interface seedData {
   userData: userData[];
   gameData: gameData[];
   resultData: resultData[];
@@ -45,7 +48,7 @@ const seed = async ({ userData, gameData, resultData }: seedData) => {
   });
 
   // Seed Results
-  const results = await resultData.map((result, index) => {
+  const results = resultData.map((result, index) => {
     const returnResult = {
       status: result.status,
       createdAt: result.createdAt,

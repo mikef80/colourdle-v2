@@ -4,12 +4,20 @@ import userData from "../prisma/data/test-data/users";
 import gameData from "../prisma/data/test-data/games";
 import resultData from "../prisma/data/test-data/results";
 import seed from "../prisma/seeds/seed";
-import { login, signup } from "../app/utils/auth.server";
+import { login, signup } from "../app/server/auth.server";
 import bcrypt from "bcrypt";
 import request from "supertest";
 import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
+import { generateDailyColour } from "../app/server/gameplay.server";
+import { gameData as gameDataType } from "../prisma/seeds/seed";
+import { Prisma } from "@prisma/client";
 
 const URL = "http://localhost:5173/";
+
+interface answerType {
+  rgb: number[];
+  hex: string;
+}
 
 // check server is running before running tests
 beforeAll(async () => {
@@ -221,5 +229,72 @@ describe("login function", () => {
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe("/");
   });
+});
 
+describe.only("generate daily colour function", () => {
+  it("stores a new entry in the DB for the current date", async () => {
+    await generateDailyColour();
+    const currentDate = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+    const result = await prisma.game.findUnique({ where: { gameDate: currentDate } });
+
+    expect(result).not.toBeNull();
+
+    if (result) {
+      expect(result.gameDate.toISOString()).toEqual(currentDate);
+    }
+  });
+
+  it("has an array containing valid rgb value stored", async () => {
+    await generateDailyColour();
+    const currentDate = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+    const result = await prisma.game.findUnique({ where: { gameDate: currentDate } });
+
+    if (result) {
+      const { rgb } = result.answer as { rgb: number[]; hex: string };
+
+      expect(rgb).not.toBeNull();
+
+      if (rgb) {
+        expect(rgb).toBeArray();
+        rgb.forEach((value) => {
+          expect(value).toBeNumber();
+          expect(value).toBeLessThanOrEqual(255);
+          expect(value).toBeGreaterThanOrEqual(0);
+        });
+      }
+    }
+  });
+
+  it("has a string containing a valid hex value stored", async () => {
+    await generateDailyColour();
+    const currentDate = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+    const result = await prisma.game.findUnique({ where: { gameDate: currentDate } });
+
+    if (result) {
+      const { hex } = result.answer as { rgb: number[]; hex: string };
+
+      expect(typeof hex).toBe("string");
+      expect(hex.length).toBe(7);
+
+      for (let i = 1; i < 7; i++) {
+        const value = parseInt(hex[i], 16);
+        expect(value).toBeGreaterThanOrEqual(0);
+        expect(value).toBeLessThanOrEqual(0xf);
+      }
+    }
+  });
+
+  it("only allows single value per date to be created and stored", async () => {
+    await generateDailyColour();
+    let dbError;
+
+    try {
+      await generateDailyColour();
+    } catch (error) {
+      dbError = error;
+    }
+
+    expect(dbError).toBeInstanceOf(Prisma.PrismaClientKnownRequestError);
+    expect((dbError as Prisma.PrismaClientKnownRequestError).code).toBe("P2002");
+  });
 });
