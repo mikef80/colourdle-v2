@@ -11,6 +11,7 @@ import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.ser
 import { generateDailyColour } from "../app/server/gameplay.server";
 import { gameData as gameDataType } from "../prisma/seeds/seed";
 import { Prisma } from "@prisma/client";
+import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/utils/colourUtils.server";
 
 const URL = "http://localhost:5173/";
 
@@ -52,6 +53,23 @@ describe("utils functions", () => {
     const hashedPassword = await encryptPassword(password);
 
     expect(await comparePassword(password, hashedPassword)).toBe(true);
+  });
+
+  it("should return the correct RGB value for a given hex value using the hexToRGB function", async () => {
+    const hex = "#FF0000";
+
+    const rgb = hexToRgb(hex);
+
+    expect(rgb).toEqual([255, 0, 0]);
+  });
+
+  it("should return a valid triplet where each value is between 0 and 255 using the generateRandomRGB function", () => {
+    const RGB = generateRandomRGB();
+
+    RGB.forEach((value) => {
+      expect(value).toBeGreaterThanOrEqual(0);
+      expect(value).toBeLessThanOrEqual(255);
+    });
   });
 });
 
@@ -231,7 +249,7 @@ describe("login function", () => {
   });
 });
 
-describe.only("generate daily colour function", () => {
+describe("generate daily colour function", () => {
   it("stores a new entry in the DB for the current date", async () => {
     await generateDailyColour();
     const currentDate = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
@@ -297,4 +315,22 @@ describe.only("generate daily colour function", () => {
     expect(dbError).toBeInstanceOf(Prisma.PrismaClientKnownRequestError);
     expect((dbError as Prisma.PrismaClientKnownRequestError).code).toBe("P2002");
   });
+
+  it("generates rgb and hex values that equate to the same colour", async () => {
+    await generateDailyColour();
+    const currentDate = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+    const result = await prisma.game.findUnique({ where: { gameDate: currentDate } });
+
+    if (result) {
+      const { rgb, hex } = result.answer as { rgb: [number, number, number]; hex: string };
+
+      const convertedRgb = hexToRgb(hex);
+      const convertedHex = rgbToHex(rgb);
+
+      expect(convertedRgb).toMatchObject(rgb);
+      expect(convertedHex).toEqual(hex);
+    }
+  });
 });
+
+describe("check guess function", () => {});
