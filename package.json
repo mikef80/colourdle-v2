@@ -6,6 +6,7 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "test": "jest --watch",
+    "coverage": "jest --coverage",
     "seed": "npx prisma db seed",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"
@@ -48,10 +49,5 @@
     "typescript": "^5.7.2",
     "vite": "^5.4.11",
     "vite-tsconfig-paths": "^5.1.4"
-  },
-  "jest": {
-    "setupFilesAfterEnv": [
-      "jest-extended/all"
-    ]
   }
 }
