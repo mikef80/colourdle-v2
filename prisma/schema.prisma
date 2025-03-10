@@ -39,7 +39,7 @@ model Result {
 
 model Game {
   id       String   @id @default(cuid())
-  gameDate DateTime
-  answer   Int[]
+  gameDate DateTime @unique
+  answer   Json
   Results  Result[]
 }

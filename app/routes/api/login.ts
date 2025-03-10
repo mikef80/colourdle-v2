@@ -1,5 +1,5 @@
 import { redirect } from "@remix-run/node";
-import { login } from "~/utils/auth.server";
+import { login } from "~/server/auth.server";
 
 export const action = async ({ request }: { request: Request }) => {
   try {

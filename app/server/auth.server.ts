@@ -1,6 +1,6 @@
 import prisma from "../db/client";
-import { comparePassword, encryptPassword } from "./passwordUtils.server";
-import { commitSession, getSession } from "./sessions.server";
+import { comparePassword, encryptPassword } from "../utils/passwordUtils.server";
+import { commitSession, getSession } from "../utils/sessionsUtils.server";
 
 interface SignupData {
   email: string;
