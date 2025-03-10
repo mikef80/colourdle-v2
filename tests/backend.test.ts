@@ -8,7 +8,8 @@ import { login, signup } from "../app/server/auth.server";
 import bcrypt from "bcrypt";
 import request from "supertest";
 import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
-import { generateDailyColour } from "../app/server/gameplay.server";
+import { checkGuess, generateDailyColour } from "../app/server/gameplay.server";
+import * as gamePlayUtils from "../app/server/gameplay.server";
 import { gameData as gameDataType } from "../prisma/seeds/seed";
 import { Prisma } from "@prisma/client";
 import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/utils/colourUtils.server";
@@ -333,4 +334,15 @@ describe("generate daily colour function", () => {
   });
 });
 
-describe("check guess function", () => {});
+describe.only("check guess function", () => {
+  it("takes and array and a string as an argument", () => {
+    jest.spyOn(gamePlayUtils, "checkGuess");
+
+    gamePlayUtils.checkGuess([146, 90, 234], "#925AEA");
+
+    expect(gamePlayUtils.checkGuess).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.any(String)
+    );
+  });
+});

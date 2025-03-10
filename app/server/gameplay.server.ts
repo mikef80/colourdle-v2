@@ -20,6 +20,6 @@ const generateDailyColour = async () => {
 };
 
 // check guess
-
+const checkGuess = (rgbGuess: number[], hexGuess: string) => {};
 // export functions
-export { generateDailyColour };
+export { generateDailyColour, checkGuess };
