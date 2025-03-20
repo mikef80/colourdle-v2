@@ -36,6 +36,23 @@ const checkGuess = async (rgbGuess: number[], hexGuess: string): Promise<GuessRe
 
   console.log(currentResult, "<--currentResult");
 
+  if (!currentResult) throw new Error("No game data for given date");
+
+  const { rgb } = currentResult.answer as AnswerType;
+
+  const rgbResponse = rgb.map((originalValue, index) => {
+    console.log(originalValue, "///", index, "///", rgbGuess[index]);
+    const guessValueString = rgbGuess[index].toString();
+    const originalValueString = originalValue.toString();
+
+    // Count occurrences of each digit in the original value
+    const digitCounts: Record<string, number> = {};
+    for (const digit of originalValueString) {
+      digitCounts[digit] = (digitCounts[digit] || 0) + 1;
+    }
+    console.log(digitCounts, "<--dc");
+  });
+
   return {
     rgb: [
       new Array(rgbGuess[0].toString().length).fill("correct"),

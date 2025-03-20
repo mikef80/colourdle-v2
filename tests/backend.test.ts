@@ -401,5 +401,54 @@ describe("check guess function", () => {
       
     });
   }); */
+
+  it.only("returns correct/valid/invalid for each digit in the RGB submission", async () => {
+    // Arrange
+    await generateDailyColour();
+    const currentDate = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+    const result = await prisma.game.findUnique({ where: { gameDate: currentDate } });
+
+    if (!result) throw new Error("No game data for given date");
+
+    const { rgb: originalRGB } = result.answer as AnswerType;
+    console.log(originalRGB, "<--original");
+
+    const amendedRGB = amendRGB(originalRGB);
+    console.log(amendedRGB, "<--amended");
+
+    const hex = rgbToHex(amendedRGB);
+
+    // Act
+    const response = await checkGuess(amendedRGB, hex);
+    console.log(response, "<--response");
+
+    // Assert
+    expect(response.rgb).toBeArray();
+    expect(response.rgb).not.toBeArrayOfSize(0);
+
+    response.rgb.forEach((colour, i) => {
+      expect(colour).toBeArray();
+      expect(colour).not.toBeArrayOfSize(0);
+      expect(colour.length).toBe([...amendedRGB[i].toString()].length);
+
+      // Check each digit's status
+      colour.forEach((status, digitIndex) => {
+        const originalDigitStr = originalRGB[i].toString();
+        const guessDigitStr = amendedRGB[i].toString();
+
+        if (
+          digitIndex < originalDigitStr.length &&
+          guessDigitStr[digitIndex] === originalDigitStr[digitIndex]
+        ) {
+          expect(status).toBe("correct");
+        } else if (originalDigitStr.includes(guessDigitStr[digitIndex])) {
+          expect(status).toBe("valid");
+        } else {
+          expect(status).toBe("invalid");
+        }
+      });
+    });
+  });
+
   // check response array entries for HEX
 });
