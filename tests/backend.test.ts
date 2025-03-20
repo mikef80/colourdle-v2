@@ -8,11 +8,12 @@ import { login, signup } from "../app/server/auth.server";
 import bcrypt from "bcrypt";
 import request from "supertest";
 import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
-import { checkGuess, generateDailyColour } from "../app/server/gameplay.server";
+import { checkGuess, generateDailyColour, AnswerType } from "../app/server/gameplay.server";
 import * as gamePlayUtils from "../app/server/gameplay.server";
 import { gameData as gameDataType } from "../prisma/seeds/seed";
 import { Prisma } from "@prisma/client";
 import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/utils/colourUtils.server";
+import { amendRGB } from "./testUtils";
 
 const URL = "http://localhost:5173/";
 
@@ -334,9 +335,9 @@ describe("generate daily colour function", () => {
   });
 });
 
-describe.only("check guess function", () => {
+describe("check guess function", () => {
   it("takes and array and a string as an argument", () => {
-    jest.spyOn(gamePlayUtils, "checkGuess");
+    const spy = jest.spyOn(gamePlayUtils, "checkGuess");
 
     gamePlayUtils.checkGuess([146, 90, 234], "#925AEA");
 
@@ -344,5 +345,61 @@ describe.only("check guess function", () => {
       expect.any(Array),
       expect.any(String)
     );
+
+    spy.mockRestore();
   });
+
+  it("returns an object containing an rgb key and a hex key", async () => {
+    const response = await checkGuess([146, 90, 234], "#925AEA");
+
+    expect(response).toBeObject();
+    expect(response).toContainAllKeys(["rgb", "hex"]);
+  });
+
+  it("response provides arrays for both the rgb and hex keys", async () => {
+    const response = await checkGuess([146, 90, 234], "#925AEA");
+
+    Object.entries(response).forEach(([key, value]) => {
+      expect(value).toBeArray();
+    });
+  });
+
+  // check response array entries for RGB
+  /* it.only('returns a variety of "correct", "valid" and "invalid" responses, based on an RGB submission', async () => {
+    // Arrange
+    await generateDailyColour();
+    const currentDate = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+    const result = await prisma.game.findUnique({ where: { gameDate: currentDate } });
+
+    if (!result) throw new Error("No game data for given date");
+
+    const { rgb: originalRGB } = result.answer as AnswerType;
+    console.log(originalRGB, "<--original");
+
+    const amendedRGB = amendRGB(originalRGB);
+    console.log(amendedRGB, "<--amended");
+
+    const hex = rgbToHex(amendedRGB);
+
+    // Act
+    const response = await checkGuess(amendedRGB, hex);
+    console.log(response, "<--response");
+
+    // Assert
+    expect(response.rgb).toBeArray();
+    expect(response.rgb).not.toBeArrayOfSize(0);
+
+    response.rgb.forEach((colour, i) => {
+      console.log(colour, "<--colour");
+
+      expect(colour).toBeArray();
+      expect(colour).not.toBeArrayOfSize(0);
+      expect(colour.length).toBe([...amendedRGB[i].toString()].length);
+
+      // check this below!
+
+      
+    });
+  }); */
+  // check response array entries for HEX
 });
