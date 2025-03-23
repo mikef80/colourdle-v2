@@ -411,16 +411,16 @@ describe("check guess function", () => {
     if (!result) throw new Error("No game data for given date");
 
     const { rgb: originalRGB } = result.answer as AnswerType;
-    console.log(originalRGB, "<--original");
+    // console.log(originalRGB, "<--original");
 
     const amendedRGB = amendRGB(originalRGB);
-    console.log(amendedRGB, "<--amended");
+    // console.log(amendedRGB, "<--amended");
 
     const hex = rgbToHex(amendedRGB);
 
     // Act
     const response = await checkGuess(amendedRGB, hex);
-    console.log(response, "<--response");
+    // console.log(response, "<--response");
 
     // Assert
     expect(response.rgb).toBeArray();

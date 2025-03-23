@@ -34,31 +34,67 @@ const checkGuess = async (rgbGuess: number[], hexGuess: string): Promise<GuessRe
   const currentDate = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
   const currentResult = await prisma.game.findUnique({ where: { gameDate: currentDate } });
 
-  console.log(currentResult, "<--currentResult");
+  // console.log(currentResult, "<--currentResult");
 
   if (!currentResult) throw new Error("No game data for given date");
 
-  const { rgb } = currentResult.answer as AnswerType;
+  const { rgb: originalRGB } = currentResult.answer as AnswerType;
+  console.log(originalRGB, "<--originalRGB");
+  console.log(rgbGuess, "<--rgbGuess");
 
-  const rgbResponse = rgb.map((originalValue, index) => {
-    console.log(originalValue, "///", index, "///", rgbGuess[index]);
-    const guessValueString = rgbGuess[index].toString();
-    const originalValueString = originalValue.toString();
-
-    // Count occurrences of each digit in the original value
-    const digitCounts: Record<string, number> = {};
-    for (const digit of originalValueString) {
-      digitCounts[digit] = (digitCounts[digit] || 0) + 1;
+  // Count totals of digits in answer
+  const digitCount: Record<string, number> = {};
+  for (const value of originalRGB) {
+    const digits = value.toString().split("");
+    // console.log(digits, "<--digits");
+    for (const digit of digits) {
+      digitCount[digit] = (digitCount[digit] || 0) + 1;
     }
-    console.log(digitCounts, "<--dc");
+  }
+
+
+  // copy of digit count to decerement as I go
+  const trackingDigitCount = { ...digitCount };
+
+  // setup - create results array and input placeholders
+  const resultsArray: any = [];
+  originalRGB.forEach((number) => {
+    resultsArray.push(new Array(number.toString().length).fill("invalid"));
   });
+  // first check all correct digits and decrement counts
+  originalRGB.forEach((number, i) => {
+    const numberSplit = number
+      .toString()
+      .split("")
+      .map((n) => Number(n));
+    const guessNumberSplit = rgbGuess[i]
+      .toString()
+      .split("")
+      .map((n) => Number(n));
+
+    console.log(`
+      ---------------------------\n
+      ${i + ": " + numberSplit}\n
+      ${i + ": " + guessNumberSplit}\n
+      ---------------------------\n
+      `);
+
+    guessNumberSplit.forEach((n, j) => {
+      if (numberSplit[j] === guessNumberSplit[j]) {
+        trackingDigitCount[numberSplit[j]] -= 1;
+        resultsArray[i][j] = "correct";
+      }
+    });
+  });
+  // then check for valid numbers and decrement counts
+  // mark all others as invalid
+
+  console.log(resultsArray, "<--resultsArray");
+  console.log(digitCount, "<--digitCount");
+  console.log(trackingDigitCount, "<--trackingDigitCount");
 
   return {
-    rgb: [
-      new Array(rgbGuess[0].toString().length).fill("correct"),
-      new Array(rgbGuess[1].toString().length).fill("correct"),
-      new Array(rgbGuess[2].toString().length).fill("correct"),
-    ],
+    rgb: resultsArray,
     hex: [],
   };
 };
