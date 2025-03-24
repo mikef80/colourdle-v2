@@ -52,7 +52,6 @@ const checkGuess = async (rgbGuess: number[], hexGuess: string): Promise<GuessRe
     }
   }
 
-
   // copy of digit count to decerement as I go
   const trackingDigitCount = { ...digitCount };
 
