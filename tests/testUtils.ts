@@ -5,6 +5,8 @@ const amendRGB = (rgb: number[]): [number, number, number] => {
       ? (value -= Math.floor(Math.random() * 9))
       : (value += Math.floor(Math.random() * (Math.ceil(value / 10) * 10 - value)));
   }) as [number, number, number];
+
+  // return [176, 176, 254];
 };
 
 export { amendRGB };
