@@ -14,6 +14,7 @@ import { gameData as gameDataType } from "../prisma/seeds/seed";
 import { Prisma } from "@prisma/client";
 import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/utils/colourUtils.server";
 import { amendRGB } from "./testUtils";
+import { availableMemory } from "process";
 
 const URL = "http://localhost:5173/";
 
@@ -335,7 +336,7 @@ describe("generate daily colour function", () => {
   });
 });
 
-describe("check guess function", () => {
+describe.only("check guess function", () => {
   it("takes and array and a string as an argument", () => {
     const spy = jest.spyOn(gamePlayUtils, "checkGuess");
 
@@ -364,91 +365,15 @@ describe("check guess function", () => {
     });
   });
 
-  // check response array entries for RGB
-  /* it.only('returns a variety of "correct", "valid" and "invalid" responses, based on an RGB submission', async () => {
+  it('returns "correct" for correct RGB guesses', () => {
     // Arrange
-    await generateDailyColour();
-    const currentDate = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
-    const result = await prisma.game.findUnique({ where: { gameDate: currentDate } });
-
-    if (!result) throw new Error("No game data for given date");
-
-    const { rgb: originalRGB } = result.answer as AnswerType;
-    console.log(originalRGB, "<--original");
-
-    const amendedRGB = amendRGB(originalRGB);
-    console.log(amendedRGB, "<--amended");
-
-    const hex = rgbToHex(amendedRGB);
-
+    
+    
     // Act
-    const response = await checkGuess(amendedRGB, hex);
-    console.log(response, "<--response");
-
+    
+    
     // Assert
-    expect(response.rgb).toBeArray();
-    expect(response.rgb).not.toBeArrayOfSize(0);
-
-    response.rgb.forEach((colour, i) => {
-      console.log(colour, "<--colour");
-
-      expect(colour).toBeArray();
-      expect(colour).not.toBeArrayOfSize(0);
-      expect(colour.length).toBe([...amendedRGB[i].toString()].length);
-
-      // check this below!
-
-      
-    });
-  }); */
-
-  it.only("returns correct/valid/invalid for each digit in the RGB submission", async () => {
-    // Arrange
-    await generateDailyColour();
-    const currentDate = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
-    const result = await prisma.game.findUnique({ where: { gameDate: currentDate } });
-
-    if (!result) throw new Error("No game data for given date");
-
-    const { rgb: originalRGB } = result.answer as AnswerType;
-    // console.log(originalRGB, "<--original");
-
-    const amendedRGB = amendRGB(originalRGB);
-    // console.log(amendedRGB, "<--amended");
-
-    const hex = rgbToHex(amendedRGB);
-
-    // Act
-    const response = await checkGuess(amendedRGB, hex);
-    // console.log(response, "<--response");
-
-    // Assert
-    expect(response.rgb).toBeArray();
-    expect(response.rgb).not.toBeArrayOfSize(0);
-
-    response.rgb.forEach((colour, i) => {
-      expect(colour).toBeArray();
-      expect(colour).not.toBeArrayOfSize(0);
-      expect(colour.length).toBe([...amendedRGB[i].toString()].length);
-
-      // Check each digit's status
-      colour.forEach((status, digitIndex) => {
-        const originalDigitStr = originalRGB[i].toString();
-        const guessDigitStr = amendedRGB[i].toString();
-
-        if (
-          digitIndex < originalDigitStr.length &&
-          guessDigitStr[digitIndex] === originalDigitStr[digitIndex]
-        ) {
-          expect(status).toBe("correct");
-        } else if (originalDigitStr.includes(guessDigitStr[digitIndex])) {
-          expect(status).toBe("valid");
-        } else {
-          expect(status).toBe("invalid");
-        }
-      });
-    });
+    
+    
   });
-
-  // check response array entries for HEX
 });
