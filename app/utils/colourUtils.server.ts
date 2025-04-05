@@ -23,4 +23,7 @@ const generateRandomRGB = (): [number, number, number] => {
   return [r, g, b];
 };
 
-export { hexToRgb, rgbToHex, generateRandomRGB };
+const prepRGBStructures = (rgb: [number, number, number]) =>
+  rgb.map((num) => num.toString().split("").map(Number));
+
+export { hexToRgb, rgbToHex, generateRandomRGB, prepRGBStructures };
