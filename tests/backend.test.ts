@@ -8,17 +8,19 @@ import { login, signup } from "../app/server/auth.server";
 import bcrypt from "bcrypt";
 import request from "supertest";
 import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
-import { generateDailyColour } from "../app/server/gameplay.server";
+import {
+  checkGuess,
+  generateDailyColour,
+  GuessAnswerType,
+} from "../app/server/gameplay.server";
+import * as gamePlayUtils from "../app/server/gameplay.server";
 import { gameData as gameDataType } from "../prisma/seeds/seed";
 import { Prisma } from "@prisma/client";
 import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/utils/colourUtils.server";
+import { amendRGB } from "./testUtils";
+import { availableMemory } from "process";
 
 const URL = "http://localhost:5173/";
-
-interface answerType {
-  rgb: number[];
-  hex: string;
-}
 
 // check server is running before running tests
 beforeAll(async () => {
@@ -333,4 +335,104 @@ describe("generate daily colour function", () => {
   });
 });
 
-describe("check guess function", () => {});
+describe("check guess function", () => {
+  it("takes an array as an argument", () => {
+    const spy = jest.spyOn(gamePlayUtils, "checkGuess");
+    const guess: GuessAnswerType = [146, 190, 234];
+    const answer: GuessAnswerType = [146, 190, 234];
+
+    gamePlayUtils.checkGuess(guess, answer);
+
+    expect(gamePlayUtils.checkGuess).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.any(Array)
+    );
+
+    spy.mockRestore();
+  });
+
+  it("returns an object containing an rgb key key", async () => {
+    const guess: GuessAnswerType = [146, 190, 234];
+    const answer: GuessAnswerType = [146, 190, 234];
+
+    const response = await checkGuess(guess, answer);
+
+    expect(response).toBeObject();
+    expect(response).toContainAllKeys(["rgb"]);
+  });
+
+  it("response provides array for the rgb key", async () => {
+    const guess: GuessAnswerType = [146, 190, 234];
+    const answer: GuessAnswerType = [146, 190, 234];
+
+    const response = await checkGuess(guess, answer);
+
+    Object.entries(response).forEach(([key, value]) => {
+      expect(value).toBeArray();
+    });
+  });
+
+  it('returns "correct" for correct RGB digits', async () => {
+    // Arrange
+    const guess: GuessAnswerType = [146, 190, 234];
+    const answer: GuessAnswerType = [146, 190, 234];
+
+    // Act
+    const response = await checkGuess(guess, answer);
+    const { rgb } = response;
+
+    // Assert
+    rgb.forEach((subArray) => {
+      subArray.forEach((value) => expect(value).toBe("correct"));
+    });
+  });
+
+  it('returns "valid" for valid RGB digits (correct digits but in wrong position)', async () => {
+    // Arrange
+    const guess: GuessAnswerType = [146, 190, 234];
+    const answer: GuessAnswerType = [144, 196, 230];
+
+    // Act
+    const response = await checkGuess(guess, answer);
+    const { rgb } = response;
+
+    // Assert
+    rgb.forEach((subArray) => {
+      expect(subArray[2]).toBe("valid");
+    });
+  });
+
+  it("returns 'invalid' for invalid RGB digits (don't appears in the answer or have run out of number of occurences)", async () => {
+    // Arrange
+    const answer: GuessAnswerType = [146, 190, 234];
+    const guess: GuessAnswerType = [176, 191, 231];
+
+    // Act
+    const response = await checkGuess(guess, answer);
+    const { rgb } = response;
+
+    // Assert
+    expect(rgb).toMatchObject([
+      ["correct", "invalid", "correct"],
+      ["correct", "correct", "invalid"],
+      ["correct", "correct", "invalid"],
+    ]);
+  });
+
+  it("returns a full answer with all appropriate responses", async () => {
+    // Arrange
+    const answer: GuessAnswerType = [146, 190, 234];
+    const guess: GuessAnswerType = [98, 176, 254];
+
+    // Act
+    const response = await checkGuess(guess, answer);
+    const { rgb } = response;
+
+    // Assert
+    expect(rgb).toMatchObject([
+      ["valid", "invalid"],
+      ["correct", "invalid", "valid"],
+      ["correct", "invalid", "correct"],
+    ]);
+  });
+});
