@@ -69,5 +69,11 @@ const checkGuess = async (
     rgb: rgbResponse,
   };
 };
+
+// update daily game stats
+const updateDailyGameStats = async (rgbGuess: [number, number, number]) => {
+  return { guesses: [] };
+};
+
 // export functions
-export { generateDailyColour, checkGuess, GuessAnswerType };
+export { generateDailyColour, checkGuess, updateDailyGameStats, GuessAnswerType };

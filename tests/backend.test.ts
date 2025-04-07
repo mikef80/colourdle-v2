@@ -12,6 +12,7 @@ import {
   checkGuess,
   generateDailyColour,
   GuessAnswerType,
+  updateDailyGameStats,
 } from "../app/server/gameplay.server";
 import * as gamePlayUtils from "../app/server/gameplay.server";
 import { gameData as gameDataType } from "../prisma/seeds/seed";
@@ -29,14 +30,21 @@ beforeAll(async () => {
     throw new Error("Backend server is not running. Start it before running tests.");
   }
 });
-beforeEach(() => seed({ userData, gameData, resultData }));
-afterEach(async () => {
+beforeEach(async () => {
   await prisma.result.deleteMany();
   await prisma.game.deleteMany();
   await prisma.user.deleteMany();
-  jest.resetAllMocks();
+  await seed({ userData, gameData, resultData });
 });
-afterAll(() => prisma.$disconnect());
+
+afterEach(() => {
+  jest.restoreAllMocks();
+  // jest.clearAllMocks();
+});
+afterAll(() => {
+  jest.resetAllMocks();
+  prisma.$disconnect();
+});
 
 describe("utils functions", () => {
   it("should return a valid encrypted password from encryptPassword function", async () => {
@@ -343,15 +351,10 @@ describe("check guess function", () => {
 
     gamePlayUtils.checkGuess(guess, answer);
 
-    expect(gamePlayUtils.checkGuess).toHaveBeenCalledWith(
-      expect.any(Array),
-      expect.any(Array)
-    );
-
-    spy.mockRestore();
+    expect(spy).toHaveBeenCalledWith(expect.any(Array), expect.any(Array));
   });
 
-  it("returns an object containing an rgb key key", async () => {
+  it("returns an object containing an rgb key", async () => {
     const guess: GuessAnswerType = [146, 190, 234];
     const answer: GuessAnswerType = [146, 190, 234];
 
@@ -437,4 +440,45 @@ describe("check guess function", () => {
   });
 });
 
-describe("update daily play stats", () => {});
+describe("update daily play stats", () => {
+  it('takes an argument, "rgbGuess" that is an array of three numbers', async () => {
+    // Arrange
+    const spy = jest.spyOn(gamePlayUtils, "updateDailyGameStats");
+    const guess: GuessAnswerType = [146, 190, 234];
+
+    // Act
+    gamePlayUtils.updateDailyGameStats(guess);
+    const calledWith = spy.mock.calls[0][0];
+
+    // Assert
+    expect(calledWith).toHaveLength(3);
+    calledWith.forEach((value) => {
+      expect(typeof value).toBe("number");
+      expect(value).toBeGreaterThanOrEqual(0);
+      expect(value).toBeLessThanOrEqual(255);
+    });
+  });
+
+  it("has a function called updateDailyGameStats that returns an object", async () => {
+    // Arrange
+    const input: GuessAnswerType = [98, 176, 254];
+
+    // Act
+    const response = await updateDailyGameStats(input);
+
+    // Assert
+    expect(typeof response).toBe("object");
+  });
+
+  it('has a "guesses" key which stores an array of the values of the guesses for a given game', async () => {
+    // Arrange
+    const input: GuessAnswerType = [98, 176, 254];
+
+    // Act
+    const response = await updateDailyGameStats(input);
+
+    // Assert
+    expect(response).toHaveProperty("guesses");
+    expect(response.guesses).toBeArray();
+  });
+});
