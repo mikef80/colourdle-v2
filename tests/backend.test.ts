@@ -335,7 +335,7 @@ describe("generate daily colour function", () => {
   });
 });
 
-describe.only("check guess function", () => {
+describe("check guess function", () => {
   it("takes an array as an argument", () => {
     const spy = jest.spyOn(gamePlayUtils, "checkGuess");
     const guess: GuessAnswerType = [146, 190, 234];
@@ -422,7 +422,7 @@ describe.only("check guess function", () => {
   it("returns a full answer with all appropriate responses", async () => {
     // Arrange
     const answer: GuessAnswerType = [146, 190, 234];
-    const guess: GuessAnswerType = [147, 194, 235];
+    const guess: GuessAnswerType = [98, 176, 254];
 
     // Act
     const response = await checkGuess(guess, answer);
@@ -430,9 +430,9 @@ describe.only("check guess function", () => {
 
     // Assert
     expect(rgb).toMatchObject([
-      ["correct", "correct", "invalid"],
-      ["correct", "correct", "valid"],
-      ["correct", "correct", "invalid"],
+      ["valid", "invalid"],
+      ["correct", "invalid", "valid"],
+      ["correct", "invalid", "correct"],
     ]);
   });
 });
