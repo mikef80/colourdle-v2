@@ -40,7 +40,6 @@ const checkGuess = async (
   const rgbGuessRestructured = prepRGBStructures(rgbGuess); // [ [ 1, 4, 6 ], [ 1, 9, 0 ], [ 2, 3, 4 ] ]
   const answerRestructured = prepRGBStructures(answer);
   const rgbResponse = rgbGuessRestructured.map((array) => array.map((item) => "incorrect"));
-  console.log(answerFrequency);
 
   // First pass - check correct digits
   for (let i = 0; i < rgbGuessRestructured.length; i++) {

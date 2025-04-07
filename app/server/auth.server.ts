@@ -15,14 +15,22 @@ interface LoginData {
 }
 
 const signup = async ({ email, firstname, lastname, password }: SignupData) => {
+  if (!email || !firstname || !lastname || !password) {
+    return new Response(JSON.stringify({ error: "Missing required fields." }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
 
-    if (existingUser)
+    if (existingUser) {
       return new Response(JSON.stringify({ error: "Email already in use" }), {
-        status: 400,
+        status: 409,
         headers: { "content-type": "application/json" },
       });
+    }
 
     const hashedPassword = await encryptPassword(password);
 
@@ -48,8 +56,7 @@ const signup = async ({ email, firstname, lastname, password }: SignupData) => {
       },
     });
   } catch (error) {
-    console.error("Signup error:", error);
-    return new Response(JSON.stringify({ error: "Something went wrong" }), {
+    return new Response(JSON.stringify({ error: `Signup error: ${error}` }), {
       status: 500,
       headers: { "content-type": "application/json" },
     });
@@ -88,8 +95,7 @@ const login = async ({ email, password }: LoginData) => {
       headers: { "content-type": "application/json" },
     });
   } catch (error) {
-    console.error("Login error:", error);
-    return new Response(JSON.stringify({ error: "Something went wrong" }), {
+    return new Response(JSON.stringify({ error: `Login error: ${error}` }), {
       status: 500,
       headers: { "content-type": "application/json" },
     });

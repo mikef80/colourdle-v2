@@ -18,8 +18,6 @@ import { gameData as gameDataType } from "../prisma/seeds/seed";
 import { Prisma } from "@prisma/client";
 import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/utils/colourUtils.server";
 
-
-
 const URL = "http://localhost:5173/";
 
 // check server is running before running tests
@@ -76,7 +74,7 @@ describe("utils functions", () => {
 });
 
 describe("signup function", () => {
-  it("should throw an error if the email is already in use", async () => {
+  it("should throw a 409 error if the email is already in use", async () => {
     const response = await signup({
       email: "john.doe@example.com",
       firstname: "John",
@@ -84,8 +82,10 @@ describe("signup function", () => {
       password: "password123",
     });
 
+    const { status } = response;
     const { error } = await response.json();
 
+    expect(status).toBe(409);
     expect(error).toBe("Email already in use");
   });
 
@@ -436,3 +436,5 @@ describe("check guess function", () => {
     ]);
   });
 });
+
+describe("update daily play stats", () => {});
