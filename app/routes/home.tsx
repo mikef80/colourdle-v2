@@ -8,5 +8,6 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  console.log("process.env.NODE_ENV:", process.env.NODE_ENV);
   return <div>Test</div>;
 }

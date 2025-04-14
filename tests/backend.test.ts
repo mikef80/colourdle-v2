@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe } from "@jest/globals";
+import { beforeAll, afterAll, beforeEach, afterEach, describe } from "@jest/globals";
 import prisma from "../app/db/client";
 import userData from "../prisma/data/test-data/users";
 import gameData from "../prisma/data/test-data/games";
@@ -15,7 +15,6 @@ import {
   updateDailyGameStats,
 } from "../app/server/gameplay.server";
 import * as gamePlayUtils from "../app/server/gameplay.server";
-import { gameData as gameDataType } from "../prisma/seeds/seed";
 import { Prisma } from "@prisma/client";
 import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/utils/colourUtils.server";
 
@@ -23,6 +22,8 @@ const URL = "http://localhost:5173/";
 
 // check server is running before running tests
 beforeAll(async () => {
+  console.log("process.env.NODE_ENV:", process.env.NODE_ENV);
+
   try {
     const res = await fetch(URL);
     if (!res.ok) throw new Error("Backend not responding");
@@ -31,18 +32,17 @@ beforeAll(async () => {
   }
 });
 beforeEach(async () => {
-  await prisma.result.deleteMany();
-  await prisma.game.deleteMany();
-  await prisma.user.deleteMany();
   await seed({ userData, gameData, resultData });
 });
 
 afterEach(() => {
   jest.restoreAllMocks();
-  // jest.clearAllMocks();
 });
-afterAll(() => {
-  jest.resetAllMocks();
+
+afterAll(async () => {
+  await prisma.result.deleteMany();
+  await prisma.game.deleteMany();
+  await prisma.user.deleteMany();
   prisma.$disconnect();
 });
 
