@@ -1,4 +1,5 @@
 import { JestConfigWithTsJest } from "ts-jest";
+require("dotenv").config({ path: ".env.test" });
 
 const config: JestConfigWithTsJest = {
   preset: "ts-jest",

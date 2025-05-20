@@ -1,7 +1,7 @@
 // The purpose of this file is to provide a set of utility functions for managing gameplay.
 
 import { generateRandomRGB, prepRGBStructures, rgbToHex } from "../utils/colourUtils.server";
-import prisma from "../db/client";
+import prisma from "../db/client.server";
 
 type GuessAnswerType = [number, number, number];
 
