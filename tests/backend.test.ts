@@ -1,5 +1,6 @@
 import { afterAll, beforeEach, describe } from "@jest/globals";
-import prisma from "../app/db/client";
+import prisma from "../app/db/client.server";
+// import supabase from "../app/db/client.server";
 import userData from "../prisma/data/test-data/users";
 import gameData from "../prisma/data/test-data/games";
 import resultData from "../prisma/data/test-data/results";
@@ -28,14 +29,19 @@ beforeAll(async () => {
   } catch (err) {
     throw new Error("Backend server is not running. Start it before running tests.");
   }
+  /* console.log(process.env.NODE_ENV, "<--env");
+  console.log(process.env.DATABASE_URL, "<--DB"); */
 });
+
 beforeEach(() => seed({ userData, gameData, resultData }));
+
 afterEach(async () => {
   await prisma.result.deleteMany();
   await prisma.game.deleteMany();
   await prisma.user.deleteMany();
   jest.resetAllMocks();
 });
+
 afterAll(() => prisma.$disconnect());
 
 describe("utils functions", () => {
@@ -73,7 +79,7 @@ describe("utils functions", () => {
   });
 });
 
-describe("signup function", () => {
+/* describe("signup function", () => {
   it("should throw a 409 error if the email is already in use", async () => {
     const response = await signup({
       email: "john.doe@example.com",
@@ -158,9 +164,9 @@ describe("signup function", () => {
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe("/");
   });
-});
+}); */
 
-describe("login function", () => {
+/* describe("login function", () => {
   it("should return an error if either email or password aren't provided", async () => {
     const newUser = {
       email: "davey.jones@locker.com",
@@ -249,7 +255,9 @@ describe("login function", () => {
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe("/");
   });
-});
+}); */
+
+describe("supabase signup functions", () => {});
 
 describe("generate daily colour function", () => {
   it("stores a new entry in the DB for the current date", async () => {

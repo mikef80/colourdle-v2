@@ -1,4 +1,4 @@
-import prisma from "../db/client";
+import prisma from "../db/client.server";
 import { comparePassword, encryptPassword } from "../utils/passwordUtils.server";
 import { commitSession, getSession } from "../utils/sessionsUtils.server";
 
