@@ -12,4 +12,4 @@ async function signUpNewUser(email: string, password: string) {
 }
 
 
-signUpNewUser('mike@mike-francis.org','987654321');
+signUpNewUser('mpfrancis+test1@gmail.com','987654321');
