@@ -1,23 +1,26 @@
 import { afterAll, beforeEach, describe } from "@jest/globals";
-import prisma from "../app/db/client.server";
+import prisma from "../app/lib/db.server";
 // import supabase from "../app/db/client.server";
 import userData from "../prisma/data/test-data/users";
 import gameData from "../prisma/data/test-data/games";
 import resultData from "../prisma/data/test-data/results";
 import seed from "../prisma/seeds/seed";
-import { login, signup } from "../app/server/auth.server";
+// import { login, signup } from "../app/services/auth.server";
 import bcrypt from "bcrypt";
 import request from "supertest";
-import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
+// import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
 import {
   checkGuess,
   generateDailyColour,
   GuessAnswerType,
-} from "../app/server/gameplay.server";
-import * as gamePlayUtils from "../app/server/gameplay.server";
+} from "../app/services/gameplay.server";
+import * as gamePlayUtils from "../app/services/gameplay.server";
 import { gameData as gameDataType } from "../prisma/seeds/seed";
 import { Prisma } from "@prisma/client";
-import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/utils/colourUtils.server";
+import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/lib/colourUtils.server";
+import { createServerClient } from "@supabase/ssr";
+import { error } from "console";
+import { deleteUsers, getAllUsers, signUp } from "../app/services/auth.server";
 
 const URL = "http://localhost:5173/";
 
@@ -31,9 +34,13 @@ beforeAll(async () => {
   }
   /* console.log(process.env.NODE_ENV, "<--env");
   console.log(process.env.DATABASE_URL, "<--DB"); */
+  jest.mock("@supabase/ssr", () => ({ createServerClient: jest.fn() }));
 });
 
-beforeEach(() => seed({ userData, gameData, resultData }));
+beforeEach(async () => {
+  await deleteUsers();
+  return seed({ userData, gameData, resultData });
+});
 
 afterEach(async () => {
   await prisma.result.deleteMany();
@@ -45,7 +52,7 @@ afterEach(async () => {
 afterAll(() => prisma.$disconnect());
 
 describe("utils functions", () => {
-  it("should return a valid encrypted password from encryptPassword function", async () => {
+  /* it("should return a valid encrypted password from encryptPassword function", async () => {
     const password = "password";
     const hashedPassword = await encryptPassword(password);
 
@@ -60,7 +67,7 @@ describe("utils functions", () => {
 
     expect(await comparePassword(password, hashedPassword)).toBe(true);
   });
-
+ */
   it("should return the correct RGB value for a given hex value using the hexToRGB function", async () => {
     const hex = "#FF0000";
 
@@ -257,8 +264,6 @@ describe("utils functions", () => {
   });
 }); */
 
-describe("supabase signup functions", () => {});
-
 describe("generate daily colour function", () => {
   it("stores a new entry in the DB for the current date", async () => {
     await generateDailyColour();
@@ -445,4 +450,16 @@ describe("check guess function", () => {
   });
 });
 
-describe("update daily play stats", () => {});
+describe("Supabase auth functions", () => {
+  it("creates a user successfully with a unique email and valid password", async () => {
+    const email = "mike@mike-francis.org";
+    const password = "StrongPassword123";
+
+    const { data, error } = await signUp(email, password);
+
+    expect(error).toBeNull();
+    expect(data?.user?.email).toBe(email);
+    expect(data?.user).toBeDefined();
+    expect(data?.session).toBeDefined();
+  });
+});
