@@ -28,7 +28,7 @@ const getAllUserIds = async () => {
   return uniqueIds;
 };
 
-export const deleteUsers = async () => {
+export const deleteAllUsers = async () => {
   const uniqueIds = await getAllUserIds();
   const dataArray = [];
 
@@ -42,4 +42,4 @@ export const deleteUsers = async () => {
   return dataArray;
 };
 
-getAllUsers();
+

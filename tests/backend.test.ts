@@ -20,7 +20,7 @@ import { Prisma } from "@prisma/client";
 import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/lib/colourUtils.server";
 import { createServerClient } from "@supabase/ssr";
 import { error } from "console";
-import { deleteUsers, getAllUsers, signUp } from "../app/services/auth.server";
+import { deleteAllUsers, getAllUsers, signUp } from "../app/services/auth.server";
 
 const URL = "http://localhost:5173/";
 
@@ -38,7 +38,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await deleteUsers();
+  await deleteAllUsers();
   return seed({ userData, gameData, resultData });
 });
 
