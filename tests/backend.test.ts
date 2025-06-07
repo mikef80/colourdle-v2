@@ -7,7 +7,7 @@ import resultData from "../prisma/data/test-data/results";
 import seed from "../prisma/seeds/seed";
 // import { login, signup } from "../app/services/auth.server";
 import bcrypt from "bcrypt";
-import request from "supertest";
+
 // import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
 import {
   checkGuess,
@@ -20,7 +20,16 @@ import { Prisma } from "@prisma/client";
 import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/lib/colourUtils.server";
 import { createServerClient } from "@supabase/ssr";
 import { error } from "console";
-import { deleteAllUsers, getAllUsers, signUp } from "../app/services/auth.server";
+import {
+  deleteAllUsers,
+  getAllUsers,
+  signUp,
+  supabase,
+  supabaseAdmin,
+} from "../app/services/auth.server";
+import { action as signupAction } from "../app/routes/signup";
+import { Route } from "react-router";
+import { createSignupFormRequest } from "../app/services/helpers.server";
 
 const URL = "http://localhost:5173/";
 
@@ -451,7 +460,7 @@ describe("check guess function", () => {
 });
 
 describe("Supabase auth functions", () => {
-  it("creates a user successfully with a unique email and valid password", async () => {
+  it("signUp creates a user successfully with a unique email and valid password", async () => {
     const email = "mike@mike-francis.org";
     const password = "StrongPassword123";
 
@@ -461,5 +470,44 @@ describe("Supabase auth functions", () => {
     expect(data?.user?.email).toBe(email);
     expect(data?.user).toBeDefined();
     expect(data?.session).toBeDefined();
+  });
+
+  describe("/signup", () => {
+    describe("POST", () => {
+      it("POST:302 successfully redirects to '/confirm-user' when successful signing up", async () => {
+        const user = { email: "mike@mike-francis.org", password: "StrongPassword123" };
+
+        const request = createSignupFormRequest(user);
+
+        const res = await signupAction({ request, params: {}, context: {} });
+
+        if (res instanceof Response) {
+          expect(res.status).toBe(302); // redirect
+          expect(res.headers.get("Location")).toBe("/confirm-email");
+        }
+      });
+
+      it.only("POST:409 returns an error if a user with that email already exists", async () => {
+        // define user
+        const user = {
+          email: `mike@mike-francis.org`,
+          password: "StrongPassword123",
+        };
+
+        // create user initially
+        supabaseAdmin.auth.admin.createUser(user);
+
+        // create signup request
+        const request = createSignupFormRequest(user);
+
+        // signup user using same credentials
+        const res = await signupAction({ request, params: {}, context: {} });
+
+        console.log(res);
+
+        // should return an error?
+        expect(res).toBeInstanceOf(Error);
+      });
+    });
   });
 });
