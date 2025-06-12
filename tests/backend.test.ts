@@ -28,8 +28,12 @@ import {
   supabaseAdmin,
 } from "../app/services/auth.server";
 import { action as signupAction } from "../app/routes/signup";
+import { action as loginAction } from "../app/routes/login";
 import { Route } from "react-router";
-import { createSignupFormRequest } from "../app/services/helpers.server";
+import {
+  createLoginFormRequest,
+  createSignupFormRequest,
+} from "../app/services/helpers.server";
 
 const URL = "http://localhost:5173/";
 
@@ -472,41 +476,133 @@ describe("Supabase auth functions", () => {
     expect(data?.session).toBeDefined();
   });
 
+  it("signUp return an empty identities array if user signs up with exisiting user email", async () => {
+    const email = "mike@mike-francis.org";
+    const password = "StrongPassword123";
+
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.admin.createUser({ email, password });
+
+    if (error) throw new Error(`Error creating user: ${error.message}`);
+
+    if (!user) throw new Error("User creation returned null user");
+
+    const { id } = user;
+
+    await supabaseAdmin.auth.admin.updateUserById(id, { email_confirm: true });
+    const user2 = await signUp(email, password);
+
+    expect(user.identities!.length).toBeGreaterThan(0);
+    expect(user2.data.user?.identities!.length).toBe(0);
+  });
+
   describe("/signup", () => {
     describe("POST", () => {
-      it("POST:302 successfully redirects to '/confirm-user' when successful signing up", async () => {
+      it("POST:302 successfully redirects to '/confirm-user' when signing up", async () => {
         const user = { email: "mike@mike-francis.org", password: "StrongPassword123" };
 
         const request = createSignupFormRequest(user);
 
         const res = await signupAction({ request, params: {}, context: {} });
 
-        if (res instanceof Response) {
-          expect(res.status).toBe(302); // redirect
-          expect(res.headers.get("Location")).toBe("/confirm-email");
+        expect(res.status).toBe(302); // redirect
+        expect(res.headers.get("Location")).toBe("/confirm-email");
+      });
+
+      it("POST:400 returns an error if no password provided to signup", async () => {
+        const user = { email: "mike@mike-francis.org", password: "" };
+
+        const request = createSignupFormRequest(user);
+
+        try {
+          await signupAction({ request, params: {}, context: {} });
+          throw new Error("Expected action to throw but it did not");
+        } catch (res) {
+          if (res instanceof Response) {
+            expect(res).toBeInstanceOf(Response);
+            expect(res.status).toBe(400);
+
+            const body = await res.json();
+
+            expect(body.error).toBe("Signup requires a valid password");
+          }
         }
       });
 
-      it.only("POST:409 returns an error if a user with that email already exists", async () => {
-        // define user
-        const user = {
-          email: `mike@mike-francis.org`,
-          password: "StrongPassword123",
-        };
+      it("POST:422 returns an error if no email provided to signup", async () => {
+        const user = { email: "", password: "StrongPassword987" };
 
-        // create user initially
-        supabaseAdmin.auth.admin.createUser(user);
-
-        // create signup request
         const request = createSignupFormRequest(user);
 
-        // signup user using same credentials
-        const res = await signupAction({ request, params: {}, context: {} });
+        try {
+          await signupAction({ request, params: {}, context: {} });
+          throw new Error("Expected action to throw but it did not");
+        } catch (res) {
+          if (res instanceof Response) {
+            expect(res).toBeInstanceOf(Response);
+            expect(res.status).toBe(422);
 
-        console.log(res);
+            const body = await res.json();
 
-        // should return an error?
-        expect(res).toBeInstanceOf(Error);
+            expect(body.error).toBe("Anonymous sign-ins are disabled");
+          }
+        }
+      });
+    });
+  });
+  describe("/login", () => {
+    describe("POST", () => {
+      it("POST:302 successfully redirects to root when logging in", async () => {
+        // Arrange
+        const email = "mike@mike-francis.org";
+        const password = "StrongPassword123";
+
+        // Act
+        // Sign Up
+        const {
+          data: { user },
+          error,
+        } = await signUp(email, password);
+
+        if (error) throw new Error(`Error creating user: ${error.message}`);
+        if (!user) throw new Error("User creation returned null user");
+
+        // Confirm email address
+        await supabaseAdmin.auth.admin.updateUserById(user.id, { email_confirm: true });
+
+        // Create and send login request
+        const request = createLoginFormRequest({ email, password });
+        const loginRes = await loginAction({ request, params: {}, context: {} });
+
+        // Assert
+        expect(loginRes).toBeInstanceOf(Response);
+        expect(loginRes.status).toBe(302);
+        expect(loginRes.headers.get("Location")).toBe("/");
+      });
+
+      it("POST:400 returns an error if logging in with a non-existent user", async () => {
+        // Arrange
+        const email = "mike@mike-francis.org";
+        const password = "StrongPassword123";
+        const request = createLoginFormRequest({ email, password });
+
+        // Act
+
+        try {
+          await loginAction({ request, params: {}, context: {} });
+          throw new Error("Expected action to throw but it did not");
+        } catch (res) {
+          if (res instanceof Response) {
+            // Assert
+            expect(res).toBeInstanceOf(Response);
+            expect(res.status).toBe(400);
+
+            const body = await res.json();
+            expect(body.error).toBe("Invalid login credentials");
+          }
+        }
       });
     });
   });

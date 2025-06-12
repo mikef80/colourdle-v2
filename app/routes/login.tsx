@@ -1,4 +1,4 @@
-import { signUp } from "../services/auth.server";
+import { login } from "../services/auth.server";
 import { Route } from "../+types/root";
 import { redirect } from "react-router";
 
@@ -7,13 +7,17 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const { error } = await signUp(email, password);
+  const {
+    data: { session, user },
+    error,
+  } = await login(email, password);
 
-  if (error)
+  if (error || !user || !session) {
     throw new Response(JSON.stringify({ error: error?.message }), {
       status: error?.status,
       headers: { "Content-Type": "application/json" },
     });
+  }
 
-  return redirect("/confirm-email");
+  return redirect("/");
 };
