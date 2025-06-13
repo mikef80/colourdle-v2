@@ -24,17 +24,35 @@ model User {
   Results   Result[]
 }
 
+enum GameStatus {
+  W // Won
+  L // Lost
+  A // Abandoned
+  P // In Progress
+}
+
+model Guess {
+  id       String @id @default(cuid())
+  resultId String
+  guess    Json
+  order    Int
+
+  result Result @relation(fields: [resultId], references: [id], onDelete: Cascade)
+}
+
 model Result {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   userId    String // Foreign key to the User model
   gameId    String // Foreign key to the Games model
-  status    String   @db.Char(1) // W = Won, L = Lost A = Abandoned
-  guesses   Json // Array of guesses
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status    GameStatus
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  game Game @relation(fields: [gameId], references: [id])
+  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game  Game    @relation(fields: [gameId], references: [id])
+  guesses Guess[]
+
+  @@unique([userId, gameId])
 }
 
 model Game {

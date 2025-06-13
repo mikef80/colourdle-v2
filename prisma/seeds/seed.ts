@@ -1,7 +1,9 @@
 import prisma from "../../app/lib/db.server.ts";
 import userData from "../data/test-data/users.ts";
 import gameData from "../data/test-data/games.ts";
-import resultData from "../data/test-data/results.ts";
+import resultData, { ResultSeedEntry } from "../data/test-data/results.ts";
+import { GameStatus } from "@prisma/client";
+import { v4 as uuidv4 } from "uuid";
 
 export interface userData {
   email: string;
@@ -19,9 +21,9 @@ export interface gameData {
 }
 
 export interface resultData {
-  status: string;
-  createdAt: string;
-  updatedAt: string;
+  status: GameStatus;
+  createdAt: Date;
+  updatedAt: Date;
   guesses: number[][];
 }
 
@@ -54,7 +56,7 @@ const seed = async ({ userData, gameData, resultData }: seedData) => {
   process.env.NODE_ENV !== "test" && console.log("✅ Games created");
 
   // Seed Results
-  process.env.NODE_ENV !== "test" && console.log("Creating results...");
+  /* process.env.NODE_ENV !== "test" && console.log("Creating results...");
   const results = resultData.map((result, index) => {
     const returnResult = {
       status: result.status,
@@ -70,7 +72,54 @@ const seed = async ({ userData, gameData, resultData }: seedData) => {
 
   await prisma.result.createMany({
     data: results,
+  }); */
+
+  process.env.NODE_ENV !== "test" && console.log("Creating results...");
+
+  const usedPairs = new Set<string>();
+
+  const resultsWithIds = [];
+
+  while (resultsWithIds.length < resultData.length) {
+    const userId = userIds[Math.floor(Math.random() * userIds.length)].id;
+    const gameId = gameIds[Math.floor(Math.random() * gameIds.length)].id;
+    const pairKey = `${userId}-${gameId}`;
+
+    if (!usedPairs.has(pairKey)) {
+      usedPairs.add(pairKey);
+
+      const baseResult: ResultSeedEntry = resultData[resultsWithIds.length];
+
+      resultsWithIds.push({
+        id: uuidv4(),
+        status: baseResult.status,
+        createdAt: baseResult.createdAt,
+        updatedAt: baseResult.updatedAt,
+        userId,
+        gameId,
+        guesses: baseResult.guesses,
+      });
+    }
+  }
+
+  // Insert results first, without guesses
+  await prisma.result.createMany({
+    data: resultsWithIds.map(({ guesses, ...rest }) => rest),
   });
+
+  // Then insert guesses separately, something like:
+  for (const result of resultsWithIds) {
+    for (let i = 0; i < result.guesses.length; i++) {
+      await prisma.guess.create({
+        data: {
+          guess: result.guesses[i], // your guess JSON array
+          order: i,
+          resultId: result.id,
+        },
+      });
+    }
+  }
+
   process.env.NODE_ENV !== "test" && console.log("✅ Results created");
 
   process.env.NODE_ENV !== "test" && console.log("🙌 Seeding complete!");

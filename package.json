@@ -11,8 +11,9 @@
     "seed-test": "dotenv -e .env.test -- prisma db seed",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "migrate-dev": "dotenv -e .env.dev -- prisma migrate dev --name supabase_setup",
-    "migrate-test": "dotenv -e .env.test -- prisma migrate dev --name supabase_setup"
+    "migrate-dev": "dotenv -e .env.dev -- prisma migrate dev",
+    "migrate-test": "dotenv -e .env.test -- prisma migrate dev",
+    "migrate-reset": "dotenv -e .env.dev -- prisma migrate reset"
   },
   "prisma": {
     "seed": "ts-node prisma/seeds/run-seed.ts"
@@ -29,7 +30,8 @@
     "isbot": "^5.1.17",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router": "^7.1.5"
+    "react-router": "^7.1.5",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@react-router/dev": "^7.1.5",
