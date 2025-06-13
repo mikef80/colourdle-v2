@@ -1,4 +1,4 @@
-import prisma from "../../app/db/client.server.ts";
+import prisma from "../../app/lib/db.server.ts";
 import userData from "../data/test-data/users.ts";
 import gameData from "../data/test-data/games.ts";
 import resultData from "../data/test-data/results.ts";

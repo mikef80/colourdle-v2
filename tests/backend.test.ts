@@ -1,23 +1,39 @@
 import { afterAll, beforeEach, describe } from "@jest/globals";
-import prisma from "../app/db/client.server";
+import prisma from "../app/lib/db.server";
 // import supabase from "../app/db/client.server";
 import userData from "../prisma/data/test-data/users";
 import gameData from "../prisma/data/test-data/games";
 import resultData from "../prisma/data/test-data/results";
 import seed from "../prisma/seeds/seed";
-import { login, signup } from "../app/server/auth.server";
+// import { login, signup } from "../app/services/auth.server";
 import bcrypt from "bcrypt";
-import request from "supertest";
-import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
+
+// import { comparePassword, encryptPassword } from "../app/utils/passwordUtils.server";
 import {
   checkGuess,
   generateDailyColour,
   GuessAnswerType,
-} from "../app/server/gameplay.server";
-import * as gamePlayUtils from "../app/server/gameplay.server";
+} from "../app/services/gameplay.server";
+import * as gamePlayUtils from "../app/services/gameplay.server";
 import { gameData as gameDataType } from "../prisma/seeds/seed";
 import { Prisma } from "@prisma/client";
-import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/utils/colourUtils.server";
+import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/lib/colourUtils.server";
+import { createServerClient } from "@supabase/ssr";
+import { error } from "console";
+import {
+  deleteAllUsers,
+  getAllUsers,
+  signUp,
+  supabase,
+  supabaseAdmin,
+} from "../app/services/auth.server";
+import { action as signupAction } from "../app/routes/signup";
+import { action as loginAction } from "../app/routes/login";
+import { Route } from "react-router";
+import {
+  createLoginFormRequest,
+  createSignupFormRequest,
+} from "../app/services/helpers.server";
 
 const URL = "http://localhost:5173/";
 
@@ -31,9 +47,13 @@ beforeAll(async () => {
   }
   /* console.log(process.env.NODE_ENV, "<--env");
   console.log(process.env.DATABASE_URL, "<--DB"); */
+  jest.mock("@supabase/ssr", () => ({ createServerClient: jest.fn() }));
 });
 
-beforeEach(() => seed({ userData, gameData, resultData }));
+beforeEach(async () => {
+  await deleteAllUsers();
+  return seed({ userData, gameData, resultData });
+});
 
 afterEach(async () => {
   await prisma.result.deleteMany();
@@ -45,22 +65,6 @@ afterEach(async () => {
 afterAll(() => prisma.$disconnect());
 
 describe("utils functions", () => {
-  it("should return a valid encrypted password from encryptPassword function", async () => {
-    const password = "password";
-    const hashedPassword = await encryptPassword(password);
-
-    expect(hashedPassword).not.toBe(password);
-    expect(hashedPassword).toMatch(/^\$2[ayb]\$.{56}$/);
-    expect(await bcrypt.compare(password, hashedPassword)).toBe(true);
-  });
-
-  it("should return true when passing a valid password to comparePassword function", async () => {
-    const password = "password";
-    const hashedPassword = await encryptPassword(password);
-
-    expect(await comparePassword(password, hashedPassword)).toBe(true);
-  });
-
   it("should return the correct RGB value for a given hex value using the hexToRGB function", async () => {
     const hex = "#FF0000";
 
@@ -78,186 +82,6 @@ describe("utils functions", () => {
     });
   });
 });
-
-/* describe("signup function", () => {
-  it("should throw a 409 error if the email is already in use", async () => {
-    const response = await signup({
-      email: "john.doe@example.com",
-      firstname: "John",
-      lastname: "Smith",
-      password: "password123",
-    });
-
-    const { status } = response;
-    const { error } = await response.json();
-
-    expect(status).toBe(409);
-    expect(error).toBe("Email already in use");
-  });
-
-  it("should create the new user if the email is not in use", async () => {
-    const newUser = {
-      email: "davey.jones@locker.com",
-      firstname: "Davey",
-      lastname: "Jones",
-      password: "password123",
-    };
-
-    await signup(newUser);
-
-    const user = await prisma.user.findUnique({ where: { email: newUser.email } });
-
-    expect(user).not.toBeNull();
-
-    if (user) {
-      expect(user.email).toMatch(newUser.email);
-      expect(user.firstname).toMatch(newUser.firstname);
-      expect(user.lastname).toMatch(newUser.lastname);
-    }
-  });
-
-  it("should hash the password before storing it", async () => {
-    const newUser = {
-      email: "davey.jones@locker.com",
-      firstname: "Davey",
-      lastname: "Jones",
-      password: "password123",
-    };
-
-    await signup(newUser);
-
-    const user = await prisma.user.findUnique({ where: { email: newUser.email } });
-
-    expect(user).not.toBeNull();
-
-    if (user) {
-      const match = await bcrypt.compare(newUser.password, user.password);
-
-      expect(match).toBe(true);
-    }
-  });
-
-  it("should return a session token on successful signup", async () => {
-    const newUser = {
-      email: "davey.jones@locker.com",
-      firstname: "Davey",
-      lastname: "Jones",
-      password: "password123",
-    };
-
-    const response = await signup(newUser);
-
-    expect(response.status).toBe(201);
-    expect(response.headers.get("set-cookie")).toBeDefined();
-  });
-
-  it("should return a 302 successful signup when sending signup data to backend route", async () => {
-    const newUser = {
-      email: "davey.jones@locker.com",
-      firstname: "Davey",
-      lastname: "Jones",
-      password: "password123",
-    };
-
-    const response = await request(URL).post("/api/signup").send(newUser);
-
-    expect(response.status).toBe(302);
-    expect(response.headers.location).toBe("/");
-  });
-}); */
-
-/* describe("login function", () => {
-  it("should return an error if either email or password aren't provided", async () => {
-    const newUser = {
-      email: "davey.jones@locker.com",
-      firstname: "Davey",
-      lastname: "Jones",
-      password: "password123",
-    };
-
-    await request(URL).post("/api/signup").send(newUser);
-
-    const response = await login({ email: newUser.email, password: "" });
-    const { error } = await response.json();
-
-    expect(response.status).toBe(400);
-    expect(error).toBe("Email and password are required");
-  });
-
-  it("should return an error if the email doesn't exist", async () => {
-    const newUser = {
-      email: "davey.jones@locker.com",
-      firstname: "Davey",
-      lastname: "Jones",
-      password: "password123",
-    };
-
-    await request(URL).post("/api/signup").send(newUser);
-
-    const response = await login({
-      email: "davey.jones1@locker.com",
-      password: newUser.password,
-    });
-    const { error } = await response.json();
-
-    expect(response.status).toBe(404);
-    expect(error).toBe("User not found");
-  });
-
-  it("should return an error if the password is incorrect", async () => {
-    const newUser = {
-      email: "davey.jones@locker.com",
-      firstname: "Davey",
-      lastname: "Jones",
-      password: "password123",
-    };
-
-    await request(URL).post("/api/signup").send(newUser);
-
-    const response = await login({ email: newUser.email, password: "password124" });
-    const { error } = await response.json();
-
-    expect(response.status).toBe(401);
-    expect(error).toBe("Incorrect password");
-  });
-
-  it("should return a session token on sucessful login", async () => {
-    const newUser = {
-      email: "davey.jones@locker.com",
-      firstname: "Davey",
-      lastname: "Jones",
-      password: "password123",
-    };
-
-    await request(URL).post("/api/signup").send(newUser);
-
-    const response = await login({ email: newUser.email, password: newUser.password });
-
-    expect(response.status).toBe(201);
-    expect(response.headers.get("set-cookie")).toBeDefined();
-  });
-
-  it("should return a 302 successful login when sending login data to backend route", async () => {
-    const newUser = {
-      email: "davey.jones@locker.com",
-      firstname: "Davey",
-      lastname: "Jones",
-      password: "password123",
-    };
-
-    await request(URL).post("/api/signup").send(newUser);
-
-    const response = await request(URL).post("/api/login").send({
-      email: newUser.email,
-      password: newUser.password,
-    });
-
-    expect(response.status).toBe(302);
-    expect(response.headers.location).toBe("/");
-  });
-}); */
-
-describe("supabase signup functions", () => {});
 
 describe("generate daily colour function", () => {
   it("stores a new entry in the DB for the current date", async () => {
@@ -445,4 +269,147 @@ describe("check guess function", () => {
   });
 });
 
-describe("update daily play stats", () => {});
+describe("Supabase auth functions", () => {
+  it("signUp creates a user successfully with a unique email and valid password", async () => {
+    const email = "mike@mike-francis.org";
+    const password = "StrongPassword123";
+
+    const { data, error } = await signUp(email, password);
+
+    expect(error).toBeNull();
+    expect(data?.user?.email).toBe(email);
+    expect(data?.user).toBeDefined();
+    expect(data?.session).toBeDefined();
+  });
+
+  it("signUp return an empty identities array if user signs up with exisiting user email", async () => {
+    const email = "mike@mike-francis.org";
+    const password = "StrongPassword123";
+
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.admin.createUser({ email, password });
+
+    if (error) throw new Error(`Error creating user: ${error.message}`);
+
+    if (!user) throw new Error("User creation returned null user");
+
+    const { id } = user;
+
+    await supabaseAdmin.auth.admin.updateUserById(id, { email_confirm: true });
+    const user2 = await signUp(email, password);
+
+    expect(user.identities!.length).toBeGreaterThan(0);
+    expect(user2.data.user?.identities!.length).toBe(0);
+  });
+
+  describe("/signup", () => {
+    describe("POST", () => {
+      it("POST:302 successfully redirects to '/confirm-user' when signing up", async () => {
+        const user = { email: "mike@mike-francis.org", password: "StrongPassword123" };
+
+        const request = createSignupFormRequest(user);
+
+        const res = await signupAction({ request, params: {}, context: {} });
+
+        expect(res.status).toBe(302); // redirect
+        expect(res.headers.get("Location")).toBe("/confirm-email");
+      });
+
+      it("POST:400 returns an error if no password provided to signup", async () => {
+        const user = { email: "mike@mike-francis.org", password: "" };
+
+        const request = createSignupFormRequest(user);
+
+        try {
+          await signupAction({ request, params: {}, context: {} });
+          throw new Error("Expected action to throw but it did not");
+        } catch (res) {
+          if (res instanceof Response) {
+            expect(res).toBeInstanceOf(Response);
+            expect(res.status).toBe(400);
+
+            const body = await res.json();
+
+            expect(body.error).toBe("Signup requires a valid password");
+          }
+        }
+      });
+
+      it("POST:422 returns an error if no email provided to signup", async () => {
+        const user = { email: "", password: "StrongPassword987" };
+
+        const request = createSignupFormRequest(user);
+
+        try {
+          await signupAction({ request, params: {}, context: {} });
+          throw new Error("Expected action to throw but it did not");
+        } catch (res) {
+          if (res instanceof Response) {
+            expect(res).toBeInstanceOf(Response);
+            expect(res.status).toBe(422);
+
+            const body = await res.json();
+
+            expect(body.error).toBe("Anonymous sign-ins are disabled");
+          }
+        }
+      });
+    });
+  });
+  describe("/login", () => {
+    describe("POST", () => {
+      it("POST:302 successfully redirects to root when logging in", async () => {
+        // Arrange
+        const email = "mike@mike-francis.org";
+        const password = "StrongPassword123";
+
+        // Act
+        // Sign Up
+        const {
+          data: { user },
+          error,
+        } = await signUp(email, password);
+
+        if (error) throw new Error(`Error creating user: ${error.message}`);
+        if (!user) throw new Error("User creation returned null user");
+
+        // Confirm email address
+        await supabaseAdmin.auth.admin.updateUserById(user.id, { email_confirm: true });
+
+        // Create and send login request
+        const request = createLoginFormRequest({ email, password });
+        const loginRes = await loginAction({ request, params: {}, context: {} });
+
+        // Assert
+        expect(loginRes).toBeInstanceOf(Response);
+        expect(loginRes.status).toBe(302);
+        expect(loginRes.headers.get("Location")).toBe("/");
+      });
+
+      it("POST:400 returns an error if logging in with a non-existent user", async () => {
+        // Arrange
+        const email = "mike@mike-francis.org";
+        const password = "StrongPassword123";
+        const request = createLoginFormRequest({ email, password });
+
+        // Act
+
+        try {
+          await loginAction({ request, params: {}, context: {} });
+          throw new Error("Expected action to throw but it did not");
+        } catch (res) {
+          if (res instanceof Response) {
+            // Assert
+            expect(res).toBeInstanceOf(Response);
+            expect(res.status).toBe(400);
+
+            const body = await res.json();
+            expect(body.error).toBe("Invalid login credentials");
+          }
+        }
+      });
+    });
+  });
+});

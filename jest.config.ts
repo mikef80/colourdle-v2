@@ -1,11 +1,12 @@
 import { JestConfigWithTsJest } from "ts-jest";
-require("dotenv").config({ path: ".env.test" });
+// require("dotenv").config({ path: ".env.test" });
 
-const config: JestConfigWithTsJest = {
+const jestConfig: JestConfigWithTsJest = {
   preset: "ts-jest",
   testEnvironment: "node",
   verbose: true,
+  setupFiles: ["<rootDir>/tests/setup-env.ts"],
   setupFilesAfterEnv: ["jest-extended/all"],
 };
 
-export default config;
+export default jestConfig;
