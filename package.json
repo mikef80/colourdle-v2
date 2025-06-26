@@ -31,7 +31,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.1.5",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@react-router/dev": "^7.1.5",
@@ -52,7 +53,6 @@
     "prisma": "^6.8.2",
     "react-router-devtools": "^1.1.0",
     "supertest": "^7.0.0",
-    "tailwindcss": "^4.0.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
