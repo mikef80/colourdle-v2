@@ -31,7 +31,7 @@ export const loader = async () => {
 export default function Home() {
   const data = useLoaderData();
   const { loginVisible, signupVisible } = useMenuStore();
-  console.log(data);
+  console.log(JSON.stringify(data));
 
   // return <pre>{JSON.stringify(data, null, 2)}</pre>;
   return (
