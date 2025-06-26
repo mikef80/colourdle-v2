@@ -2,7 +2,12 @@ import { useLoaderData } from "react-router";
 import type { Route } from "./+types/home";
 import { createBrowserClient } from "@supabase/ssr";
 import dotenv from "dotenv";
-dotenv.config({ path: ".env.dev" });
+import Topbar from "~/components/Topbar/Topbar";
+import { useState } from "react";
+import Login from "~/components/Login/Login";
+import Signup from "~/components/Signup/Signup";
+import { useMenuStore } from "~/stores/useMenuStore";
+// dotenv.config({ path: ".env.dev" });
 // import { server as supabase } from "~/services/supabaseClient";
 
 export function meta({}: Route.MetaArgs) {
@@ -25,6 +30,16 @@ export const loader = async () => {
 
 export default function Home() {
   const data = useLoaderData();
-  console.log(process.env.NODE_ENV, "<--env (home.tsx)");
-  return <pre>{JSON.stringify(data, null, 2)}</pre>;
+  const { loginVisible, signupVisible } = useMenuStore();
+  console.log(data);
+
+  // return <pre>{JSON.stringify(data, null, 2)}</pre>;
+  return (
+    <>
+      {loginVisible && <Login />}
+      {signupVisible && <Signup />}
+
+      <main>stuff</main>
+    </>
+  );
 }
