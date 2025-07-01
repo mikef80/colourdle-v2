@@ -6,27 +6,32 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const passwordconfirm = formData.get("passwordconfirm") as string;
 
   const { error } = await signUp(email, password);
   console.log(error, "<--***AUTH ERROR***");
 
-  /* if (error)
-    throw new Response(JSON.stringify({ error: error?.message }), {
-      status: error?.status,
-      headers: { "Content-Type": "application/json" },
-    }); */
-
   if (error) {
-    let formError = "An unknown error occurred.";
+    let formError = {
+      passwordMatch: "",
+      passwordLength: "",
+      passwordComposition: "",
+      email: "",
+    };
+
+    if (password !== passwordconfirm) {
+      formError.passwordMatch = "Passwords do not match";
+    }
 
     if (error.code === "weak_password") {
       if (error.reasons?.includes("length")) {
-        formError = "Password is too short (minimum 6 characters).";
+        formError.passwordLength = "Password is too short (minimum 12 characters).";
       } else {
-        formError = "Password does not meet the security requirements.";
+        formError.passwordComposition =
+          "Password must contain at least 1 lowercase character, one uppercase character, one number and one special symbol.";
       }
     } else if (error.code === "email_already_exists") {
-      formError = "This email is already registered.";
+      formError.email = "This email is already registered.";
     }
 
     return { formError, supabaseError: error };

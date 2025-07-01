@@ -1,5 +1,6 @@
 import { Form, useActionData, useFetcher } from "react-router";
 import Modal from "../Modal/Modal";
+import styles from "./Signup.module.css";
 
 const Signup = () => {
   const fetcher = useFetcher();
@@ -8,7 +9,7 @@ const Signup = () => {
 
   return (
     <Modal>
-      <fetcher.Form action='/signup' method='post'>
+      <fetcher.Form action='/signup' method='post' className={styles.form}>
         <input type='email' name='email' placeholder='Enter your email...' />
         <input
           type='password'
@@ -24,7 +25,12 @@ const Signup = () => {
         />
         <button type='submit'>Submit</button>
 
-        {actionData?.formError && <p className='error'>Error: {actionData.formError}</p>}
+        {actionData?.formError &&
+          Object.keys(actionData.formError).map((key: any, index: number) => {
+            if (actionData.formError[key]) {
+              return <span className={styles.error}>Error: {actionData.formError[key]}</span>;
+            }
+          })}
       </fetcher.Form>
     </Modal>
   );

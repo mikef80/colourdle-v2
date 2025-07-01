@@ -6,6 +6,11 @@
   --raleway-font: "Raleway", sans-serif;
   --raleway-style: normal;
   --raleway-optical-sizing: auto;
+
+  --warning-colour: red;
+  --alert-colour:orange;
+  --success-colour:green;
+
 }
 
 [class^="raleway-"] {
@@ -47,6 +52,7 @@
   padding: 0;
 }
 
+*,
 *::before,
 *::after {
   box-sizing: border-box;
