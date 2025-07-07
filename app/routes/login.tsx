@@ -19,5 +19,8 @@ export const action = async ({ request }: Route.ActionArgs) => {
     });
   }
 
+  console.log(session, "<-- session");
+  console.log(user, "<-- user");
+
   return redirect("/");
 };
