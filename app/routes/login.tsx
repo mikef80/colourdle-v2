@@ -7,10 +7,6 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  console.log(email,'<--email');
-  console.log(password,'<--password');
-  
-
   const {
     data: { session, user },
     error,

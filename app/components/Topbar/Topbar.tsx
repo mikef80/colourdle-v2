@@ -5,7 +5,7 @@ import { useMenuStore } from "~/stores/useMenuStore";
 
 const Topbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { toggleLogin, toggleSignup } = useMenuStore();
+  const { toggleLoginSignup } = useMenuStore();
 
   return (
     <div className={styles.container}>
@@ -25,8 +25,7 @@ const Topbar = () => {
         Menu
       </button>
       <nav className={`${styles.navbar} ${isOpen ? styles.menuOpen : ""}`}>
-        <button onClick={toggleSignup}>Signup</button>
-        <button onClick={toggleLogin}>Login</button>
+        <button onClick={toggleLoginSignup}>Signup/Login</button>
         {/* <Link to={"/signup"}>Signup</Link>
         <Link to={"/login"}>Login</Link> */}
       </nav>

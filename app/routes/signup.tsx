@@ -1,6 +1,7 @@
 import { signUp } from "../services/auth.server";
 import { Route } from "../+types/root";
 import { redirect } from "react-router";
+import { ExtendedAuthError } from "~/utils/types";
 
 export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
@@ -9,33 +10,37 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const passwordconfirm = formData.get("passwordconfirm") as string;
 
   const { error } = await signUp(email, password);
-  console.log(error, "<--***AUTH ERROR***");
+  const typedError = error as ExtendedAuthError;
+  
 
-  if (error) {
+  if (typedError) {
     let formError = {
       passwordMatch: "",
       passwordLength: "",
       passwordComposition: "",
-      email: "",
+      genericError: "",
     };
 
     if (password !== passwordconfirm) {
       formError.passwordMatch = "Passwords do not match";
     }
 
-    if (error.code === "weak_password") {
-      if (error.reasons?.includes("length")) {
+    if (typedError.code === "weak_password") {
+      if (typedError.reasons?.includes("length")) {
         formError.passwordLength = "Password is too short (minimum 12 characters).";
-      } else {
-        formError.passwordComposition =
-          "Password must contain at least 1 lowercase character, one uppercase character, one number and one special symbol.";
       }
-    } else if (error.code === "email_already_exists") {
-      formError.email = "This email is already registered.";
+
+      if (typedError.reasons?.includes("characters")) {
+        formError.passwordComposition =
+          "Password must contain at least 1 lowercase character, 1 uppercase character, 1 number and 1 special symbol (!@#$%^&*()_+-=[]{};\\'\\:\"|<>?,./`~.)";
+      }
+    } else {
+      formError.genericError =
+        "There was a problem with your signup. Please check your details and try again";
     }
 
-    return { formError, supabaseError: error };
+    return { formError, supabaseError: typedError };
   }
 
-  return { success: true };
+  return { success: true, status: 201 };
 };

@@ -1,0 +1,27 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+form input {
+  padding: 0.5rem;
+  border: 1px solid grey;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+form button[type="submit"] {
+  padding: 0.5rem;
+  border-radius: 10px;
+  border: 1px solid grey;
+  font-size: 1rem;
+}
+
+form button[type="submit"]:hover {
+  cursor: pointer;
+}
+
+.error {
+  color: var(--warning-colour);
+}

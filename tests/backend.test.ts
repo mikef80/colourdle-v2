@@ -306,15 +306,15 @@ describe("Supabase auth functions", () => {
 
   describe("/signup", () => {
     describe("POST", () => {
-      it("POST:302 successfully redirects to '/confirm-user' when signing up", async () => {
+      it("POST:201 successfully creates new user when signing up", async () => {
         const user = { email: "mike@mike-francis.org", password: "StrongPassword123" };
 
         const request = createSignupFormRequest(user);
 
         const res = await signupAction({ request, params: {}, context: {} });
 
-        expect(res.status).toBe(302); // redirect
-        expect(res.headers.get("Location")).toBe("/confirm-email");
+        expect(res.status).toBe(201);
+        expect(res.success).toBeTrue();
       });
 
       it("POST:400 returns an error if no password provided to signup", async () => {

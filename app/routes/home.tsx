@@ -4,8 +4,8 @@ import { createBrowserClient } from "@supabase/ssr";
 import dotenv from "dotenv";
 import Topbar from "~/components/Topbar/Topbar";
 import { useState } from "react";
-import Login from "~/components/Login/Login";
-import Signup from "~/components/Signup/Signup";
+
+import LoginSignup from "~/components/LoginSignup/LoginSignup";
 import { useMenuStore } from "~/stores/useMenuStore";
 // dotenv.config({ path: ".env.dev" });
 // import { server as supabase } from "~/services/supabaseClient";
@@ -30,15 +30,13 @@ export const loader = async () => {
 
 export default function Home() {
   const data = useLoaderData();
-  const { loginVisible, signupVisible } = useMenuStore();
+  const { loginSignupVisible } = useMenuStore();
   console.log(JSON.stringify(data));
 
   // return <pre>{JSON.stringify(data, null, 2)}</pre>;
   return (
     <>
-      {loginVisible && <Login />}
-      {signupVisible && <Signup />}
-
+      {loginSignupVisible && <LoginSignup />}
       <main>stuff</main>
     </>
   );
