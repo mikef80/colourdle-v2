@@ -7,8 +7,7 @@ const Topbar = ({ user }: { user: any | null }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { toggleLoginSignup } = useMenuStore();
 
-  console.log(user);
-  
+  console.log(user, "<--user (Topbar.tsx)");
 
   return (
     <div className={styles.container}>

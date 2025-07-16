@@ -7,8 +7,7 @@ export async function getUserSession(request: Request) {
     error,
   } = await supabase.auth.getUser();
 
-  console.log(user);
-  
+  console.log(user, "<--user (session.server.ts)");
 
   return { user, error };
 }
