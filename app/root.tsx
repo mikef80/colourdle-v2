@@ -13,6 +13,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import Topbar from "./components/Topbar/Topbar";
 import { createSupabaseServerClient } from "./lib/supabase.server";
+import { getUserSession } from "./utils/session.server";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -28,15 +29,13 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { supabase } = await createSupabaseServerClient(request);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { user } = await getUserSession(request);
   return { user };
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { user } = useLoaderData() as { user: any | null };
+
   return (
     <html lang='en'>
       <head>
@@ -46,6 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
+        <Topbar user={user} />
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -55,16 +55,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { user } = useLoaderData();
-
-  console.log(user);
-
-  return (
-    <>
-      <Topbar />
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

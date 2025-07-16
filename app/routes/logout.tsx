@@ -1,7 +1,11 @@
+import { getUserSession } from "~/utils/session.server";
 import { createSupabaseServerClient, supabaseSession } from "../lib/supabase.server";
 import { redirect } from "react-router";
 
 export const loader = async ({ request }: { request: Request }) => {
+  const { user } = await getUserSession(request);
+  if (!user) return;
+
   const { supabase } = await createSupabaseServerClient(request);
   await supabase.auth.signOut();
 

@@ -8,7 +8,6 @@ import LoginForm from "./LoginForm";
 const LoginSignup = () => {
   const fetcher = useFetcher();
   const actionData = fetcher.data;
-  console.log(actionData, "<-- actionData");
   const [selectedForm, setSelectedForm] = useState("signup");
 
   const toggleForm = (e: React.MouseEvent<HTMLButtonElement>) => {

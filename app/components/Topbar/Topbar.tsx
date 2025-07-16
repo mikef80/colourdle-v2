@@ -3,9 +3,12 @@ import styles from "./Topbar.module.css";
 import { useState } from "react";
 import { useMenuStore } from "~/stores/useMenuStore";
 
-const Topbar = () => {
+const Topbar = ({ user }: { user: any | null }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { toggleLoginSignup } = useMenuStore();
+
+  console.log(user);
+  
 
   return (
     <div className={styles.container}>
