@@ -20,20 +20,20 @@ import { Prisma } from "@prisma/client";
 import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/lib/colourUtils.server";
 import { createServerClient } from "@supabase/ssr";
 import { error } from "console";
-import {
+/* import {
   deleteAllUsers,
   getAllUsers,
   signUp,
   supabase,
   supabaseAdmin,
-} from "../app/services/auth.server";
-import { action as signupAction } from "../app/routes/signup";
-import { action as loginAction } from "../app/routes/login";
+} from "../app/services/auth.server"; */
+// import { action as signupAction } from "../app/routes/signup";
+// import { action as loginAction } from "../app/routes/login";
 import { Route } from "react-router";
-import {
+/* import {
   createLoginFormRequest,
   createSignupFormRequest,
-} from "../app/services/helpers.server";
+} from "../app/services/helpers.server"; */
 
 const URL = "http://localhost:5173/";
 

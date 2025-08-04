@@ -20,12 +20,12 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const { loginVisible, signupVisible } = useMenuStore();
+  
   
   return (
     <>
-      {loginVisible && <Login />}
-      {signupVisible && <Signup />}
+       <Login />
+       <Signup />
 
       <main>stuff</main>
     </>
