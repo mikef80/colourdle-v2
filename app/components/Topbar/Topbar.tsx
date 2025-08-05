@@ -2,10 +2,17 @@ import { Link } from "react-router";
 import styles from "./Topbar.module.css";
 import { useState } from "react";
 import { useMenuStore } from "~/stores/useMenuStore";
+import { useAuth } from "~/utils/auth-context";
+import { supabase } from "~/utils/supabase.client";
 
 const Topbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { toggleLogin, toggleSignup } = useMenuStore();
+  const { user, loading } = useAuth();
+
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+  };
 
   return (
     <div className={styles.container}>
@@ -25,8 +32,10 @@ const Topbar = () => {
         Menu
       </button>
       <nav className={`${styles.navbar} ${isOpen ? styles.menuOpen : ""}`}>
-        <button onClick={toggleSignup}>Signup</button>
-        <button onClick={toggleLogin}>Login</button>
+        {!user && <button onClick={toggleSignup}>Signup</button>}
+        {!user && <button onClick={toggleLogin}>Login</button>}
+        {user && <button onClick={logout}>Logout</button>}
+
         {/* <Link to={"/signup"}>Signup</Link>
         <Link to={"/login"}>Login</Link> */}
       </nav>

@@ -1,13 +1,25 @@
-import { Form, redirect } from "react-router";
+import { Form, redirect, useNavigate } from "react-router";
 import { useState } from "react";
 import { supabase } from "~/utils/supabase.client";
 import { AuthApiError, AuthError } from "@supabase/supabase-js";
+import Modal from "../Modal/Modal";
+import { useMenuStore } from "~/stores/useMenuStore";
 
 const Signup = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [error, setError] = useState<AuthError>();
+  const [error, setError] = useState<AuthError | null>(null);
+  const { toggleSignup } = useMenuStore();
+  const navigate = useNavigate();
+
+  const resetStates = () => {
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setError(null);
+    toggleSignup();
+  };
 
   const handleSubmit = async () => {
     if (password! !== confirmPassword) {
@@ -28,39 +40,42 @@ const Signup = () => {
       return;
     }
 
-    
-    return redirect('/login');
+    resetStates();
+
+    return navigate("/");
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <label htmlFor='signupemail'>Email:</label>
-      <input
-        type='email'
-        name='signupemail'
-        id='signupemail'
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <label htmlFor='signuppassword'>Password:</label>
-      <input
-        type='password'
-        name='signuppassword'
-        id='signuppassword'
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <label htmlFor='signupconfirmpassword'>Confirm Password:</label>
-      <input
-        type='password'
-        name='signupconfirmpassword'
-        id='signupconfirmpassword'
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-      />
-      <button type='submit'>Sign Up</button>
-      {error && <p>{error.message}</p>}
-    </Form>
+    <Modal>
+      <Form onSubmit={handleSubmit}>
+        <label htmlFor='signupemail'>Email:</label>
+        <input
+          type='email'
+          name='signupemail'
+          id='signupemail'
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <label htmlFor='signuppassword'>Password:</label>
+        <input
+          type='password'
+          name='signuppassword'
+          id='signuppassword'
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <label htmlFor='signupconfirmpassword'>Confirm Password:</label>
+        <input
+          type='password'
+          name='signupconfirmpassword'
+          id='signupconfirmpassword'
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+        <button type='submit'>Sign Up</button>
+        {error && <p>{error.message}</p>}
+      </Form>
+    </Modal>
   );
 };
 

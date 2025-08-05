@@ -9,6 +9,7 @@ import Signup from "~/components/Signup/Signup";
 import { useMenuStore } from "~/stores/useMenuStore";
 import { supabase } from "~/utils/supabase.client";
 import { createClient } from "~/utils/supabase.server";
+import { useAuth } from "~/utils/auth-context";
 // dotenv.config({ path: ".env.dev" });
 // import { server as supabase } from "~/services/supabaseClient";
 
@@ -20,12 +21,16 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  
-  
+  const loginVisible = useMenuStore((state) => state.loginVisible);
+  const signupVisible = useMenuStore((state) => state.signupVisible);
+  const { user, loading } = useAuth();
+
   return (
     <>
-       <Login />
-       <Signup />
+      <Topbar />
+      {/* {loginVisible && <Login />} */}
+      {!user && loginVisible && <Login />}
+      {!user && signupVisible && <Signup />}
 
       <main>stuff</main>
     </>
