@@ -1,4 +1,4 @@
-import { Form } from "react-router";
+import { Form, redirect } from "react-router";
 import { useState } from "react";
 import { supabase } from "~/utils/supabase.client";
 import { AuthApiError, AuthError } from "@supabase/supabase-js";
@@ -27,6 +27,9 @@ const Signup = () => {
       setError(error);
       return;
     }
+
+    
+    return redirect('/login');
   };
 
   return (
