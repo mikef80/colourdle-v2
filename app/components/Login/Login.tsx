@@ -1,4 +1,4 @@
-import { Form } from "react-router";
+import { Form, useNavigate } from "react-router";
 import { useState } from "react";
 import { supabase } from "~/utils/supabase.client";
 import type { AuthError } from "@supabase/supabase-js";
@@ -6,7 +6,8 @@ import type { AuthError } from "@supabase/supabase-js";
 const Login = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<AuthError>();
+  const [error, setError] = useState<AuthError | null>(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -15,6 +16,12 @@ const Login = () => {
       setError(error);
       return;
     }
+
+    setEmail("");
+    setPassword("");
+    setError(null);
+
+    return navigate("/");
   };
 
   return (
