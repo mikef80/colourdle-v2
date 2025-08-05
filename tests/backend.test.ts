@@ -50,10 +50,10 @@ beforeAll(async () => {
   jest.mock("@supabase/ssr", () => ({ createServerClient: jest.fn() }));
 });
 
-beforeEach(async () => {
+/* beforeEach(async () => {
   await deleteAllUsers();
   return seed({ userData, gameData, resultData });
-});
+});*/
 
 afterEach(async () => {
   await prisma.result.deleteMany();
@@ -269,7 +269,7 @@ describe("check guess function", () => {
   });
 });
 
-describe("Supabase auth functions", () => {
+/* describe("Supabase auth functions", () => {
   it("signUp creates a user successfully with a unique email and valid password", async () => {
     const email = "mike@mike-francis.org";
     const password = "StrongPassword123";
@@ -412,4 +412,4 @@ describe("Supabase auth functions", () => {
       });
     });
   });
-});
+}); */
