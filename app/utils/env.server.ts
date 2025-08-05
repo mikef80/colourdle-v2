@@ -7,7 +7,7 @@ function getEnvVar(name: string): string {
 }
 
 export const env = {
-  SUPABASE_URL: getEnvVar("PUBLIC_SUPABASE_URL"),
-  SUPABASE_ANON_KEY: getEnvVar("PUBLIC_SUPABASE_ANON_KEY"),
+  SUPABASE_URL: getEnvVar("VITE_SUPABASE_URL"),
+  SUPABASE_ANON_KEY: getEnvVar("VITE_SUPABASE_ANON_KEY"),
   SUPABASE_SERVICE_ROLE_KEY: getEnvVar("SUPABASE_SERVICE_ROLE_KEY"),
 };

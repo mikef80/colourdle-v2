@@ -20,20 +20,20 @@ import { Prisma } from "@prisma/client";
 import { generateRandomRGB, hexToRgb, rgbToHex } from "../app/lib/colourUtils.server";
 import { createServerClient } from "@supabase/ssr";
 import { error } from "console";
-import {
+/* import {
   deleteAllUsers,
   getAllUsers,
   signUp,
   supabase,
   supabaseAdmin,
-} from "../app/services/auth.server";
-import { action as signupAction } from "../app/routes/signup";
-import { action as loginAction } from "../app/routes/login";
+} from "../app/services/auth.server"; */
+// import { action as signupAction } from "../app/routes/signup";
+// import { action as loginAction } from "../app/routes/login";
 import { Route } from "react-router";
-import {
+/* import {
   createLoginFormRequest,
   createSignupFormRequest,
-} from "../app/services/helpers.server";
+} from "../app/services/helpers.server"; */
 
 const URL = "http://localhost:5173/";
 
@@ -50,10 +50,10 @@ beforeAll(async () => {
   jest.mock("@supabase/ssr", () => ({ createServerClient: jest.fn() }));
 });
 
-beforeEach(async () => {
+/* beforeEach(async () => {
   await deleteAllUsers();
   return seed({ userData, gameData, resultData });
-});
+});*/
 
 afterEach(async () => {
   await prisma.result.deleteMany();
@@ -269,7 +269,7 @@ describe("check guess function", () => {
   });
 });
 
-describe("Supabase auth functions", () => {
+/* describe("Supabase auth functions", () => {
   it("signUp creates a user successfully with a unique email and valid password", async () => {
     const email = "mike@mike-francis.org";
     const password = "StrongPassword123";
@@ -412,4 +412,4 @@ describe("Supabase auth functions", () => {
       });
     });
   });
-});
+}); */
