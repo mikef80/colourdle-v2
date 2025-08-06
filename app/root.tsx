@@ -46,6 +46,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <AuthProvider>
+      <Topbar />
       <Outlet />
     </AuthProvider>
   );
