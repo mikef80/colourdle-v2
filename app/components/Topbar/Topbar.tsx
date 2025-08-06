@@ -6,6 +6,7 @@ import { useAuth } from "~/utils/auth-context";
 import { supabase } from "~/utils/supabase.client";
 import Login from "../Login/Login";
 import Signup from "../Signup/Signup";
+import { Spin as Hamburger } from "hamburger-react";
 
 const Topbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +20,7 @@ const Topbar = () => {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${styles.header}`}>
       <h1 className={styles.title}>
         <span className='letter-1 raleway-black'>C</span>
         <span className='letter-2 raleway-black'>o</span>
@@ -32,9 +33,9 @@ const Topbar = () => {
         <span className='letter-9 raleway-black'>e</span>
         <span className='letter-10 raleway-black'>!</span>
       </h1>
-      <button className='menu-toggle' onClick={() => setIsOpen(!isOpen)}>
-        Menu
-      </button>
+      <div className={styles.menuToggleContainer}>
+        <Hamburger direction='right' toggled={isOpen} toggle={setIsOpen} />
+      </div>
       <nav className={`${styles.navbar} ${isOpen ? styles.menuOpen : ""}`}>
         {!user && <button onClick={toggleSignup}>Signup</button>}
         {!user && <button onClick={toggleLogin}>Login</button>}
