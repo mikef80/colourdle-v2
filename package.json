@@ -5,6 +5,7 @@
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
+    "dev-host": "react-router dev --host",
     "test": "jest --watch",
     "coverage": "jest --coverage",
     "seed-dev": "dotenv -e .env.dev -- prisma db seed",
