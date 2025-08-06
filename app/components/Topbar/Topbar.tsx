@@ -4,11 +4,15 @@ import { useState } from "react";
 import { useMenuStore } from "~/stores/useMenuStore";
 import { useAuth } from "~/utils/auth-context";
 import { supabase } from "~/utils/supabase.client";
+import Login from "../Login/Login";
+import Signup from "../Signup/Signup";
 
 const Topbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { toggleLogin, toggleSignup } = useMenuStore();
   const { user, loading } = useAuth();
+  const loginVisible = useMenuStore((state) => state.loginVisible);
+  const signupVisible = useMenuStore((state) => state.signupVisible);
 
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -39,6 +43,8 @@ const Topbar = () => {
         {/* <Link to={"/signup"}>Signup</Link>
         <Link to={"/login"}>Login</Link> */}
       </nav>
+      {!user && loginVisible && <Login />}
+      {!user && signupVisible && <Signup />}
     </div>
   );
 };

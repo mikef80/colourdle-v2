@@ -21,18 +21,5 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const loginVisible = useMenuStore((state) => state.loginVisible);
-  const signupVisible = useMenuStore((state) => state.signupVisible);
-  const { user, loading } = useAuth();
-
-  return (
-    <>
-      <Topbar />
-      {/* {loginVisible && <Login />} */}
-      {!user && loginVisible && <Login />}
-      {!user && signupVisible && <Signup />}
-
-      <main>stuff</main>
-    </>
-  );
+  return <main>stuff</main>;
 }
