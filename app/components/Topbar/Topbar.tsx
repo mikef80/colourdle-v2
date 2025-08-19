@@ -9,11 +9,12 @@ import Signup from "../Signup/Signup";
 import { Spin as Hamburger } from "hamburger-react";
 
 const Topbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { toggleLogin, toggleSignup } = useMenuStore();
+  // const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { toggleLogin, toggleSignup, toggleMenu } = useMenuStore();
   const { user, loading } = useAuth();
   const loginVisible = useMenuStore((state) => state.loginVisible);
   const signupVisible = useMenuStore((state) => state.signupVisible);
+  const menuOpen = useMenuStore((state) => state.menuOpen);
 
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -34,9 +35,9 @@ const Topbar = () => {
         <span className='letter-10 raleway-black'>!</span>
       </h1>
       <div className={styles.menuToggleContainer}>
-        <Hamburger direction='right' toggled={isOpen} toggle={setIsOpen} />
+        <Hamburger direction='right' toggled={menuOpen} toggle={toggleMenu} />
       </div>
-      <nav className={`${styles.navbar} ${isOpen ? styles.menuOpen : ""}`}>
+      <nav className={`${styles.navbar} ${menuOpen ? styles.menuOpen : ""}`}>
         {!user && <button onClick={toggleSignup}>Signup</button>}
         {!user && <button onClick={toggleLogin}>Login</button>}
         {user && <button onClick={logout}>Logout</button>}
