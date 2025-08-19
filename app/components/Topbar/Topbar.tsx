@@ -18,6 +18,7 @@ const Topbar = () => {
 
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
+    toggleMenu();
   };
 
   return (
