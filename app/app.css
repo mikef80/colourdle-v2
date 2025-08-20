@@ -48,18 +48,22 @@
 }
 
 *::before,
-*::after {
+*::after,
+* {
   box-sizing: border-box;
 }
+
 html,
 body {
   background-color: white;
   font-family: var(--raleway-font);
   color: black;
+  height: 100vh;
 }
 
 body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0.5rem;
 }

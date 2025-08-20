@@ -1,25 +1,36 @@
-import { Link } from "react-router";
 import styles from "./Topbar.module.css";
-import { useState } from "react";
+
 import { useMenuStore } from "~/stores/useMenuStore";
 import { useAuth } from "~/utils/auth-context";
 import { supabase } from "~/utils/supabase.client";
 import Login from "../Login/Login";
 import Signup from "../Signup/Signup";
+import { Spin as Hamburger } from "hamburger-react";
 
 const Topbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { toggleLogin, toggleSignup } = useMenuStore();
+  // const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { toggleLogin, toggleSignup, toggleMenu } = useMenuStore();
   const { user, loading } = useAuth();
   const loginVisible = useMenuStore((state) => state.loginVisible);
   const signupVisible = useMenuStore((state) => state.signupVisible);
+  const menuOpen = useMenuStore((state) => state.menuOpen);
+
+  const toggleMenuVisiblity = () => {
+    toggleMenu();
+    if (menuOpen) {
+      console.log("true");
+    } else {
+      console.log("false");
+    }
+  };
 
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
+    toggleMenu();
   };
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${styles.header}`}>
       <h1 className={styles.title}>
         <span className='letter-1 raleway-black'>C</span>
         <span className='letter-2 raleway-black'>o</span>
@@ -32,16 +43,13 @@ const Topbar = () => {
         <span className='letter-9 raleway-black'>e</span>
         <span className='letter-10 raleway-black'>!</span>
       </h1>
-      <button className='menu-toggle' onClick={() => setIsOpen(!isOpen)}>
-        Menu
-      </button>
-      <nav className={`${styles.navbar} ${isOpen ? styles.menuOpen : ""}`}>
+      <div className={styles.menuToggleContainer}>
+        <Hamburger direction='right' toggled={menuOpen} toggle={toggleMenuVisiblity} />
+      </div>
+      <nav className={`${styles.navbar} ${menuOpen ? styles.menuOpen : ""}`}>
         {!user && <button onClick={toggleSignup}>Signup</button>}
         {!user && <button onClick={toggleLogin}>Login</button>}
         {user && <button onClick={logout}>Logout</button>}
-
-        {/* <Link to={"/signup"}>Signup</Link>
-        <Link to={"/login"}>Login</Link> */}
       </nav>
       {!user && loginVisible && <Login />}
       {!user && signupVisible && <Signup />}

@@ -10,7 +10,7 @@ const Signup = () => {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<AuthError | null>(null);
-  const { toggleSignup } = useMenuStore();
+  const { toggleSignup, toggleMenu } = useMenuStore();
   const navigate = useNavigate();
 
   const resetStates = () => {
@@ -40,6 +40,7 @@ const Signup = () => {
       return;
     }
 
+    toggleMenu();
     resetStates();
 
     return navigate("/");

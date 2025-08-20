@@ -1,17 +1,5 @@
-import { useLoaderData } from "react-router";
 import type { Route } from "./+types/home";
-import { createBrowserClient } from "@supabase/ssr";
-import dotenv from "dotenv";
-import Topbar from "~/components/Topbar/Topbar";
-import { useState } from "react";
-import Login from "~/components/Login/Login";
-import Signup from "~/components/Signup/Signup";
-import { useMenuStore } from "~/stores/useMenuStore";
-import { supabase } from "~/utils/supabase.client";
-import { createClient } from "~/utils/supabase.server";
-import { useAuth } from "~/utils/auth-context";
-// dotenv.config({ path: ".env.dev" });
-// import { server as supabase } from "~/services/supabaseClient";
+import { useLayoutEffect, useState } from "react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -21,5 +9,28 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return <main>stuff</main>;
+  const [navbarHeight, setNavbarHeight] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    const navbar = document.querySelector<HTMLElement>("._navbar_1u6no_49");
+    if (!navbar) return;
+
+    setNavbarHeight(navbar.offsetHeight);
+
+    if (navbar) {
+      const handleTransitionEnd = () => {
+        setNavbarHeight(navbar.offsetHeight);
+      };
+      navbar.addEventListener("transitionend", handleTransitionEnd);
+
+      return () => navbar.removeEventListener("transitionend", handleTransitionEnd);
+    }
+  }, []);
+
+  return (
+    <>
+      <p>test</p>
+      <main style={{ position: "absolute", bottom: 0 }}>height: {navbarHeight}</main>
+    </>
+  );
 }
