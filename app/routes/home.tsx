@@ -13,9 +13,9 @@ export function meta({}: Route.MetaArgs) {
 
 export const loader = async () => {
   const gameExists = await checkForDailyColour();
-  if (!gameExists) generateDailyColour();
+  if (!gameExists) await generateDailyColour();
 
-  const game = checkForDailyColour();
+  const game = await checkForDailyColour();
   return game;
 };
 

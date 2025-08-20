@@ -36,10 +36,14 @@ const checkForDailyColour = async () => {
 const generateDailyColour = async () => {
   const rgb = generateRandomRGB();
   const hex = rgbToHex(rgb);
+  const now = new Date();
+  const gameDate = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+
+  console.log(gameDate, "<--***");
 
   await prisma.game.create({
     data: {
-      gameDate: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
+      gameDate,
       answer: {
         rgb,
         hex,
@@ -97,4 +101,4 @@ const checkGuess = async (
   };
 };
 // export functions
-export { generateDailyColour, checkGuess, checkForDailyColour,GuessAnswerType };
+export { generateDailyColour, checkGuess, checkForDailyColour, GuessAnswerType };
