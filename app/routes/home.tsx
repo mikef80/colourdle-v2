@@ -9,7 +9,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const [navbarHeight, setNavbarHeight] = useState<number | null>(null);
+  /* const [navbarHeight, setNavbarHeight] = useState<number | null>(null);
 
   useLayoutEffect(() => {
     const navbar = document.querySelector<HTMLElement>("nav");
@@ -25,12 +25,12 @@ export default function Home() {
 
       return () => navbar.removeEventListener("transitionend", handleTransitionEnd);
     }
-  }, []);
+  }, []); */
 
   return (
     <>
       <p>test</p>
-      <main style={{ position: "absolute", bottom: 0 }}>height: {navbarHeight}</main>
+      {/* <main style={{ position: "absolute", bottom: 0 }}>height: {navbarHeight}</main> */}
     </>
   );
 }
