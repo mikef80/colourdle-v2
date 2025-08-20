@@ -5,6 +5,33 @@ import prisma from "../lib/db.server";
 
 type GuessAnswerType = [number, number, number];
 
+// check for exisiting daily colour
+const checkForDailyColour = async () => {
+  // set today at 00:00:00
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // set tomorrow at 00:00:00
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  try {
+    const game = await prisma.game.findFirstOrThrow({
+      where: {
+        gameDate: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
+    });
+    console.log("Today's game:", game);
+    return game;
+  } catch (error) {
+    console.error("***No game found for today.***");
+    return null;
+  }
+};
+
 // generate daily colour
 const generateDailyColour = async () => {
   const rgb = generateRandomRGB();
@@ -70,4 +97,4 @@ const checkGuess = async (
   };
 };
 // export functions
-export { generateDailyColour, checkGuess, GuessAnswerType };
+export { generateDailyColour, checkGuess, checkForDailyColour,GuessAnswerType };
