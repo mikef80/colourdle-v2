@@ -12,7 +12,7 @@ export default function Home() {
   const [navbarHeight, setNavbarHeight] = useState<number | null>(null);
 
   useLayoutEffect(() => {
-    const navbar = document.querySelector<HTMLElement>("._navbar_1u6no_49");
+    const navbar = document.querySelector<HTMLElement>("nav");
     if (!navbar) return;
 
     setNavbarHeight(navbar.offsetHeight);
