@@ -1,5 +1,8 @@
+import { checkForDailyColour, generateDailyColour } from "~/services/gameplay.server";
 import type { Route } from "./+types/home";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
+import gameData from "prisma/data/test-data/games";
+import { useLoaderData } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -7,6 +10,14 @@ export function meta({}: Route.MetaArgs) {
     { name: "Colourdle!", content: "Welcome to the NEW Colourdle!" },
   ];
 }
+
+export const loader = async () => {
+  const gameExists = await checkForDailyColour();
+  if (!gameExists) await generateDailyColour();
+
+  const game = await checkForDailyColour();
+  return game;
+};
 
 export default function Home() {
   /* const [navbarHeight, setNavbarHeight] = useState<number | null>(null);
@@ -27,9 +38,11 @@ export default function Home() {
     }
   }, []); */
 
+  const game = useLoaderData();
+
   return (
     <>
-      <p>test</p>
+      <p>game: {JSON.stringify(game, null, 2)}</p>
       {/* <main style={{ position: "absolute", bottom: 0 }}>height: {navbarHeight}</main> */}
     </>
   );
